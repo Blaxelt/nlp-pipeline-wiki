@@ -1,0 +1,651 @@
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dcat:   <http://www.w3.org/ns/dcat#>
+PREFIX dct:    <http://purl.org/dc/terms/>
+PREFIX dcv:    <https://dataid.dbpedia.org/databus-cv#>
+PREFIX databus: <https://dataid.dbpedia.org/databus#>
+
+SELECT ?file WHERE
+{	
+	{
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/categories> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/categories> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+	UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/commons-sameas-links> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/commons-sameas-links> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/disambiguations> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/disambiguations> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/external-links> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/external-links> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+	UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/geo-coordinates> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/geo-coordinates> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/homepages> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/homepages> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/infobox-properties> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/infobox-properties> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+	UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/infobox-property-definitions> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/infobox-property-definitions> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/interlanguage-links> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/interlanguage-links> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/labels> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/labels> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+	UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/page> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/page> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/persondata> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/persondata> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    	{
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/redirects> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/redirects> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+	UNION
+    {
+        GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/revisions> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/revisions> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            { ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/wikipedia-links> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/generic/wikipedia-links> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'ttl' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/geo-coordinates-mappingbased> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/geo-coordinates-mappingbased> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/instance-types> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/instance-types> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/mappingbased-literals> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/mappingbased-literals> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/mappingbased-objects> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/mappingbased-objects> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/specific-mappingbased-properties> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/mappings/specific-mappingbased-properties> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#compression> 'bzip2' . }
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/transition/freebase-links> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/transition/freebase-links> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+		GRAPH ?g
+        {
+            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/transition/links> .
+            {
+                ?distribution dct:hasVersion ?version {
+                    SELECT (?v as ?version) { 
+                        GRAPH ?g2 { 
+                            ?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/transition/links> . 
+                            ?dataset dct:hasVersion ?v . 
+                        }
+                    } ORDER BY DESC (STR(?version)) LIMIT 1 
+                }
+            }
+            { ?distribution <http://purl.org/dc/terms/hasVersion> '2019.02.01' . }
+            { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+            ?dataset dcat:distribution ?distribution .
+            ?distribution databus:file ?file .
+        }
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/text/short-abstracts> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/text/short-abstracts> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/text/long-abstracts> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/dbpedia/text/long-abstracts> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/propan/lhd/linked-hypernyms> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/propan/lhd/linked-hypernyms> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+		    {   
+                { ?distribution <https://dataid.dbpedia.org/databus-cv#type> 'core' . }
+                UNION
+                {
+                    { ?distribution <https://dataid.dbpedia.org/databus-cv#type> 'extension' . }
+                    { ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }            
+                }
+            }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/denis/ontology/dbo-snapshots> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/denis/ontology/dbo-snapshots> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus#formatExtension> 'nt' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/long-abstracts> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/long-abstracts> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/sameAs> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/sameAs> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/labels> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/labels> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+    UNION
+    {
+	    GRAPH ?g
+		{
+			?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/short-abstracts> .
+			{
+				?distribution dct:hasVersion ?version {
+					SELECT (?v as ?version) { 
+						GRAPH ?g2 { 
+							?dataset databus:artifact <https://databus.dbpedia.org/vehnem/replaced-iris/short-abstracts> . 
+							?dataset dct:hasVersion ?v . 
+						}
+					} ORDER BY DESC (STR(?version)) LIMIT 1 
+				}
+			}
+			{ ?distribution <https://dataid.dbpedia.org/databus-cv#lang> 'es' . }
+			?dataset dcat:distribution ?distribution .
+			?distribution databus:file ?file .
+		}
+    }
+}

@@ -1,0 +1,4 @@
+fastapi[standard]==0.133.1
+wikitextparser==0.56.4
+spacy==3.8.11
+matplotlib==3.10.3

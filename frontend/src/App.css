@@ -1,0 +1,98 @@
+.top-bar {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: rgb(36, 34, 34);
+  border-radius: 12px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 300px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal h3 {
+  margin: 0;
+}
+
+.modal input[type="date"] {
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-actions button {
+  color: rgb(253, 253, 253);
+  padding: 3px;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.input-container button {
+  padding: 3px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.input-container input {
+  padding: 3px;
+}
+
+.panels {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.clean-panel {
+  width: 50%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.original-panel {
+  width: 50%;
+  height: 100%;
+  padding: 20px;
+}
+
+.original-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.error {
+  color: red;
+}

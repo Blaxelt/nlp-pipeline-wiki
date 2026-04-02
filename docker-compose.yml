@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      CORS_ORIGINS: "http://localhost:5173"
+    expose:
+      - "8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pgdata:
