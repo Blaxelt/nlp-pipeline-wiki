@@ -47,7 +47,7 @@ def extract_entities(parsed) -> list[dict]:
             continue
 
         surface = link.text if link.text else title
-        if not surface:
+        if not surface or not str(surface).strip():
             continue
 
         url = (

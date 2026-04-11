@@ -18,6 +18,7 @@ function App() {
   const [iframeSrc, setIframeSrc] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [extractMsg, setExtractMsg] = useState('')
+  const [entities, setEntities] = useState<any[]>([])
 
   const buildIframeSrc = (id: string, fragment?: string) => {
     const base = `https://es.wikipedia.org/w/index.php?oldid=${id}`
@@ -32,6 +33,7 @@ function App() {
     setArticleId(id)
     setInputValue(id)
     setIframeSrc(buildIframeSrc(id))
+    setEntities([])
     fetch(`${API_URL}/articles/${id}`)
       .then(response => {
         if (!response.ok) throw new Error('Article not found')
@@ -120,6 +122,7 @@ function App() {
         return
       }
       const data = await response.json()
+      setEntities(data.entities || [])
       setExtractMsg(`✅ ${data.count} entities saved`)
     } catch {
       setExtractMsg('❌ Could not reach server')
@@ -158,6 +161,7 @@ function App() {
         articleText={articleText}
         iframeSrc={iframeSrc}
         handleTextSelection={handleTextSelection}
+        entities={entities}
       />
     </div>
   )
