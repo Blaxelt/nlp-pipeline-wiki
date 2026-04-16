@@ -9,6 +9,8 @@ export interface TopBarProps {
     extracting: boolean;
     extractMsg: string;
     error: string;
+    handleCompareCleaners: () => void;
+    articleId_forCompare: string;
 }
 
 export function TopBar({
@@ -21,7 +23,9 @@ export function TopBar({
     handleExtractEntities,
     extracting,
     extractMsg,
-    error
+    error,
+    handleCompareCleaners,
+    articleId_forCompare
 }: TopBarProps) {
     return (
         <div className="top-bar">
@@ -44,6 +48,13 @@ export function TopBar({
                     title="Extract wikilink entities and save to JSON"
                 >
                     {extracting ? '⏳' : '🔗 Extract'}
+                </button>
+                <button
+                    onClick={handleCompareCleaners}
+                    disabled={!articleId_forCompare}
+                    title="Compare output of the 3 cleaning libraries"
+                >
+                    🔬 Compare
                 </button>
                 {extractMsg && (
                     <p style={{

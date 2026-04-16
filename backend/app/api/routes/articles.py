@@ -91,3 +91,44 @@ def extract_article_entities(article_id: str = Path(..., title="Article ID")):
         json.dump(entities, f, ensure_ascii=False, indent=2)
 
     return {"file": str(out_path), "count": len(entities), "entities": entities}
+
+
+@router.get("/articles/{article_id}/compare-cleaners")
+def compare_cleaners(article_id: str = Path(..., title="Article ID")):
+    """Fetch wikitext once and run all three cleaning libraries on it."""
+    article = article_store.get(article_id)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    # Fetch original wikitext
+    api_url = (
+        "https://es.wikipedia.org/w/api.php"
+        f"?action=query&prop=revisions&revids={article_id}"
+        "&rvprop=content&rvslots=main&format=json"
+    )
+    try:
+        req = urllib.request.Request(api_url, headers={"User-Agent": "MSc student (b.tluo@alumnos.upm.es) retrieving wikitext for master thesis (educational use)"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+        pages = data["query"]["pages"]
+        page = next(iter(pages.values()))
+        wikitext = page["revisions"][0]["slots"]["main"]["*"]
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Wikipedia API error: {exc}")
+
+    from app.process_files.cleaners import (
+        clean_mwparserfromhell,
+        clean_wikiextractor,
+        clean_wikitextparser,
+    )
+
+    return {
+        "wikitextparser": clean_wikitextparser(wikitext),
+        "mwparserfromhell": clean_mwparserfromhell(wikitext),
+        "wikiextractor": clean_wikiextractor(
+            wikitext,
+            page_id=str(page.get("pageid", "0")),
+            rev_id=article_id,
+            title=page.get("title", ""),
+        ),
+    }

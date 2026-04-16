@@ -96,3 +96,92 @@
 .error {
   color: red;
 }
+
+/* ── Cleaner Diff modal ── */
+.diff-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.diff-modal {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 20px 24px;
+  width: 85vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.diff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diff-header h3 {
+  margin: 0;
+  color: #e0e0e0;
+}
+
+.diff-header button {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.diff-selectors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ccc;
+}
+
+.diff-selectors select {
+  margin-left: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+.diff-content {
+  flex: 1;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #d4d4d4;
+  background: #252525;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.diff-added {
+  background: rgba(40, 167, 69, 0.3);
+  color: #7ce87c;
+}
+
+.diff-removed {
+  background: rgba(220, 53, 69, 0.3);
+  color: #f28b8b;
+  text-decoration: line-through;
+}
+
+.diff-legend {
+  display: flex;
+  gap: 20px;
+  font-size: 0.8rem;
+}

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { TopBar } from './components/TopBar'
 import { LoadDumpModal } from './components/LoadDumpModal'
 import { ArticlePanels } from './components/ArticlePanels'
+import { CleanerDiff } from './components/CleanerDiff'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -19,6 +20,9 @@ function App() {
   const [extracting, setExtracting] = useState(false)
   const [extractMsg, setExtractMsg] = useState('')
   const [entities, setEntities] = useState<any[]>([])
+  const [cleanerResults, setCleanerResults] = useState<any>(null)
+  const [cleanerLoading, setCleanerLoading] = useState(false)
+  const [showDiff, setShowDiff] = useState(false)
 
   const buildIframeSrc = (id: string, fragment?: string) => {
     const base = `https://es.wikipedia.org/w/index.php?oldid=${id}`
@@ -108,6 +112,22 @@ function App() {
     setIframeSrc(buildIframeSrc(articleId, fragment))
   }
 
+  const handleCompareCleaners = async () => {
+    if (!articleId) return
+    setCleanerLoading(true)
+    setShowDiff(true)
+    try {
+      const response = await fetch(`${API_URL}/articles/${articleId}/compare-cleaners`)
+      if (!response.ok) throw new Error('Error')
+      const data = await response.json()
+      setCleanerResults(data)
+    } catch {
+      setCleanerResults(null)
+    } finally {
+      setCleanerLoading(false)
+    }
+  }
+
   const handleExtractEntities = async () => {
     if (!articleId || extracting) return
     setExtracting(true)
@@ -145,6 +165,8 @@ function App() {
         extracting={extracting}
         extractMsg={extractMsg}
         error={error}
+        handleCompareCleaners={handleCompareCleaners}
+        articleId_forCompare={articleId}
       />
 
       <LoadDumpModal
@@ -156,6 +178,14 @@ function App() {
         loading={loading}
         modalError={modalError}
       />
+
+      {showDiff && (
+        <CleanerDiff
+          results={cleanerResults}
+          loading={cleanerLoading}
+          onClose={() => { setShowDiff(false); setCleanerResults(null) }}
+        />
+      )}
 
       <ArticlePanels
         articleText={articleText}
