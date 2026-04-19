@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import articles
 from app.api.routes import wikipedia_urls
+from app.api.routes import neologisms
 from contextlib import asynccontextmanager
 from app.core.wikipedia_index import load_all
 from app.core import article_store
@@ -31,3 +32,4 @@ app.add_middleware(
 
 app.include_router(articles.router)
 app.include_router(wikipedia_urls.router)
+app.include_router(neologisms.router)

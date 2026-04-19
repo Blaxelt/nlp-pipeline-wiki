@@ -4,6 +4,7 @@ import { TopBar } from './components/TopBar'
 import { LoadDumpModal } from './components/LoadDumpModal'
 import { ArticlePanels } from './components/ArticlePanels'
 import { CleanerDiff } from './components/CleanerDiff'
+import { NeologismsModal } from './components/NeologismsModal'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -23,6 +24,7 @@ function App() {
   const [cleanerResults, setCleanerResults] = useState<any>(null)
   const [cleanerLoading, setCleanerLoading] = useState(false)
   const [showDiff, setShowDiff] = useState(false)
+  const [showNeologisms, setShowNeologisms] = useState(false)
 
   const buildIframeSrc = (id: string, fragment?: string) => {
     const base = `https://es.wikipedia.org/w/index.php?oldid=${id}`
@@ -167,6 +169,7 @@ function App() {
         error={error}
         handleCompareCleaners={handleCompareCleaners}
         articleId_forCompare={articleId}
+        setShowNeologisms={setShowNeologisms}
       />
 
       <LoadDumpModal
@@ -186,6 +189,11 @@ function App() {
           onClose={() => { setShowDiff(false); setCleanerResults(null) }}
         />
       )}
+
+      <NeologismsModal
+        show={showNeologisms}
+        onClose={() => setShowNeologisms(false)}
+      />
 
       <ArticlePanels
         articleText={articleText}

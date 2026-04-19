@@ -11,6 +11,7 @@ export interface TopBarProps {
     error: string;
     handleCompareCleaners: () => void;
     articleId_forCompare: string;
+    setShowNeologisms: (show: boolean) => void;
 }
 
 export function TopBar({
@@ -25,7 +26,8 @@ export function TopBar({
     extractMsg,
     error,
     handleCompareCleaners,
-    articleId_forCompare
+    articleId_forCompare,
+    setShowNeologisms
 }: TopBarProps) {
     return (
         <div className="top-bar">
@@ -47,14 +49,20 @@ export function TopBar({
                     disabled={!articleId || extracting}
                     title="Extract wikilink entities and save to JSON"
                 >
-                    {extracting ? '⏳' : '🔗 Extract'}
+                    {extracting ? 'Extrayendo...' : 'Extract'}
                 </button>
                 <button
                     onClick={handleCompareCleaners}
                     disabled={!articleId_forCompare}
                     title="Compare output of the 3 cleaning libraries"
                 >
-                    🔬 Compare
+                    Compare
+                </button>
+                <button
+                    onClick={() => setShowNeologisms(true)}
+                    title="View and filter neologisms"
+                >
+                    Neologisms
                 </button>
                 {extractMsg && (
                     <p style={{
