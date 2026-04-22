@@ -36,7 +36,7 @@ def to_arrays(frequencies):
 def plot_zipf():
     script_dir   = Path(__file__).resolve().parent
     corpes_path  = (script_dir / '../../data/frequency/frecuencia_formas_ortograficas_1_4.txt').resolve()
-    eswiki_path  = next((script_dir / '../../data/frequency').resolve().glob('eswiki*.txt'), None)
+    eswiki_path  = (script_dir / '../../data/frequency/eswiki_20260301_word_frequencies.txt').resolve()
     output_path  = script_dir / 'zipf_plot.png'
 
     if not corpes_path.exists():
@@ -53,8 +53,8 @@ def plot_zipf():
     eswiki_ranks, eswiki_rel = to_arrays(read_eswiki(eswiki_path))
 
     fig, ax = plt.subplots(figsize=(8, 7))
-    ax.loglog(corpes_ranks, corpes_rel, color='blue',   linewidth=1, label='CORPES')
-    ax.loglog(eswiki_ranks, eswiki_rel, color='orange', linewidth=1, label='eswiki', alpha=0.8)
+    ax.loglog(corpes_ranks, corpes_rel, '.', color='blue',   markersize=1, label='CORPES')
+    ax.loglog(eswiki_ranks, eswiki_rel, '.', color='orange', markersize=1, label='eswiki', alpha=0.8)
 
     ax.set_xlabel('Rank', fontsize=12)
     ax.set_ylabel('Relative frequency', fontsize=12)
