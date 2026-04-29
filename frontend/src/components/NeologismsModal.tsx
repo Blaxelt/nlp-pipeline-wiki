@@ -66,6 +66,26 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
         }
     }
 
+    const handleMinPages = (val: string) => {
+        setMinPages(val)
+        if (maxPages && Number(val) > Number(maxPages)) setMaxPages(val)
+    }
+
+    const handleMaxPages = (val: string) => {
+        setMaxPages(val)
+        if (minPages && Number(val) < Number(minPages)) setMinPages(val)
+    }
+
+    const handleMinFreq = (val: string) => {
+        setMinFreq(val)
+        if (maxFreq && Number(val) > Number(maxFreq)) setMaxFreq(val)
+    }
+
+    const handleMaxFreq = (val: string) => {
+        setMaxFreq(val)
+        if (minFreq && Number(val) < Number(minFreq)) setMinFreq(val)
+    }
+
     if (!show) return null
 
     const hasNext = offset + limit < total
@@ -82,19 +102,19 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
                 <div className="neologisms-filters">
                     <div className="filter-group">
                         <label>Min Pages: </label>
-                        <input type="number" value={minPages} onChange={e => setMinPages(e.target.value)} />
+                        <input type="number" min={0} value={minPages} onChange={e => handleMinPages(e.target.value)} />
                     </div>
                     <div className="filter-group">
                         <label>Max Pages: </label>
-                        <input type="number" value={maxPages} onChange={e => setMaxPages(e.target.value)} />
+                        <input type="number" min={0} value={maxPages} onChange={e => handleMaxPages(e.target.value)} />
                     </div>
                     <div className="filter-group">
                         <label>Min Freq: </label>
-                        <input type="number" value={minFreq} onChange={e => setMinFreq(e.target.value)} />
+                        <input type="number" min={0} value={minFreq} onChange={e => handleMinFreq(e.target.value)} />
                     </div>
                     <div className="filter-group">
                         <label>Max Freq: </label>
-                        <input type="number" value={maxFreq} onChange={e => setMaxFreq(e.target.value)} />
+                        <input type="number" min={0} value={maxFreq} onChange={e => handleMaxFreq(e.target.value)} />
                     </div>
                     <button onClick={handleApply} disabled={loading} className="apply-btn">
                         {loading ? 'Applying...' : 'Apply Filters'}
