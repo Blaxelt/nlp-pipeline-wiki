@@ -255,12 +255,13 @@
 }
 
 .neologisms-table th:nth-child(1) {
-  width: 60%;
+  width: 45%;
 }
 
 .neologisms-table th:nth-child(2),
-.neologisms-table th:nth-child(3) {
-  width: 20%;
+.neologisms-table th:nth-child(3),
+.neologisms-table th:nth-child(4) {
+  width: 18%;
 }
 
 .neologisms-table th,

@@ -12,6 +12,8 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
     const [maxPages, setMaxPages] = useState('')
     const [minFreq, setMinFreq] = useState('')
     const [maxFreq, setMaxFreq] = useState('')
+    const [minDepth, setMinDepth] = useState('')
+    const [maxDepth, setMaxDepth] = useState('')
     const [offset, setOffset] = useState(0)
     const limit = 100
     const [results, setResults] = useState<any[]>([])
@@ -28,6 +30,8 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
             if (maxPages) params.append('max_pages', maxPages)
             if (minFreq) params.append('min_freq', minFreq)
             if (maxFreq) params.append('max_freq', maxFreq)
+            if (minDepth) params.append('min_depth', minDepth)
+            if (maxDepth) params.append('max_depth', maxDepth)
             params.append('offset', currentOffset.toString())
             params.append('limit', limit.toString())
 
@@ -86,6 +90,16 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
         if (minFreq && Number(val) < Number(minFreq)) setMinFreq(val)
     }
 
+    const handleMinDepth = (val: string) => {
+        setMinDepth(val)
+        if (maxDepth && Number(val) > Number(maxDepth)) setMaxDepth(val)
+    }
+
+    const handleMaxDepth = (val: string) => {
+        setMaxDepth(val)
+        if (minDepth && Number(val) < Number(minDepth)) setMinDepth(val)
+    }
+
     if (!show) return null
 
     const hasNext = offset + limit < total
@@ -116,6 +130,14 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
                         <label>Max Freq: </label>
                         <input type="number" min={0} value={maxFreq} onChange={e => handleMaxFreq(e.target.value)} />
                     </div>
+                    <div className="filter-group">
+                        <label>Min Depth: </label>
+                        <input type="number" min={0} value={minDepth} onChange={e => handleMinDepth(e.target.value)} />
+                    </div>
+                    <div className="filter-group">
+                        <label>Max Depth: </label>
+                        <input type="number" min={0} value={maxDepth} onChange={e => handleMaxDepth(e.target.value)} />
+                    </div>
                     <button onClick={handleApply} disabled={loading} className="apply-btn">
                         {loading ? 'Applying...' : 'Apply Filters'}
                     </button>
@@ -129,6 +151,7 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
                             <th>Word</th>
                             <th>Total Freq</th>
                             <th># Pages</th>
+                            <th>Depth</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -137,6 +160,7 @@ export function NeologismsModal({ show, onClose }: NeologismsModalProps) {
                                 <td>{item.word}</td>
                                 <td>{item.total_freq}</td>
                                 <td>{item.n_pages}</td>
+                                <td>{item.min_depth ?? '—'}</td>
                             </tr>
                         ))}
                     </tbody>
