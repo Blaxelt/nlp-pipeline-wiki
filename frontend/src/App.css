@@ -64,6 +64,22 @@
   white-space: nowrap;
 }
 
+.input-container .nav-link {
+  padding: 3px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  background: transparent;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font: inherit;;
+}
+
+.input-container .nav-link:hover {
+  opacity: 0.8;
+}
+
 .input-container input {
   padding: 3px;
 }
@@ -186,27 +202,41 @@
   font-size: 0.8rem;
 }
 
-/* ── Neologisms Modal ── */
-.neologisms-modal {
-  width: 80%;
-  max-height: 80vh;
-  overflow-y: auto;
+/* ── Neologisms page ── */
+.neologisms-page {
+  padding: 24px;
   color: #e0e0e0;
 }
 
-.neologisms-header {
+.neologisms-header-bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
+  margin-bottom: 1rem;
 }
 
-.neologisms-header button {
+.neologisms-header-bar h2 {
+  margin: 0;
+}
+
+.back-link {
+  padding: 3px 10px;
   background: #333;
   color: #e0e0e0;
   border: 1px solid #555;
-  padding: 6px 12px;
   border-radius: 4px;
+  text-decoration: none;
   cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  background: #444;
+}
+
+.result-count {
+  color: #888;
+  font-size: 0.9rem;
 }
 
 .neologisms-filters {

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export interface TopBarProps {
     articleId: string;
     inputValue: string;
@@ -11,7 +13,6 @@ export interface TopBarProps {
     error: string;
     handleCompareCleaners: () => void;
     articleId_forCompare: string;
-    setShowNeologisms: (show: boolean) => void;
 }
 
 export function TopBar({
@@ -26,8 +27,7 @@ export function TopBar({
     extractMsg,
     error,
     handleCompareCleaners,
-    articleId_forCompare,
-    setShowNeologisms
+    articleId_forCompare
 }: TopBarProps) {
     return (
         <div className="top-bar">
@@ -58,12 +58,9 @@ export function TopBar({
                 >
                     Compare
                 </button>
-                <button
-                    onClick={() => setShowNeologisms(true)}
-                    title="View and filter neologisms"
-                >
+                <Link to="/neologisms" className="nav-link" title="View and filter neologisms">
                     Neologisms
-                </button>
+                </Link>
                 {extractMsg && (
                     <p style={{
                         margin: 0, whiteSpace: 'nowrap', alignSelf: 'center',

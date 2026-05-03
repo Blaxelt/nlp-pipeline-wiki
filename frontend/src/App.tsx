@@ -1,10 +1,11 @@
 import './App.css'
 import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import { TopBar } from './components/TopBar'
 import { LoadDumpModal } from './components/LoadDumpModal'
 import { ArticlePanels } from './components/ArticlePanels'
 import { CleanerDiff } from './components/CleanerDiff'
-import { NeologismsModal } from './components/NeologismsModal'
+import { NeologismsPage } from './pages/NeologismsPage'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -24,7 +25,6 @@ function App() {
   const [cleanerResults, setCleanerResults] = useState<any>(null)
   const [cleanerLoading, setCleanerLoading] = useState(false)
   const [showDiff, setShowDiff] = useState(false)
-  const [showNeologisms, setShowNeologisms] = useState(false)
 
   const buildIframeSrc = (id: string, fragment?: string) => {
     const base = `https://es.wikipedia.org/w/index.php?oldid=${id}`
@@ -97,7 +97,6 @@ function App() {
     }
   }
 
-  // Capture mouse-up on the clean text panel and scroll the iframe
   const handleTextSelection = () => {
     if (!articleId) return
 
@@ -107,10 +106,8 @@ function App() {
     const selectedText = selection.toString().trim()
     if (!selectedText || selectedText.length < 3) return
 
-    // Use up to the first 15 words to keep the fragment URL reliable
     const fragment = selectedText.split(/\s+/).slice(0, 15).join(' ')
 
-    // Changing src forces the iframe to reload and jump to the fragment
     setIframeSrc(buildIframeSrc(articleId, fragment))
   }
 
@@ -155,53 +152,52 @@ function App() {
   }
 
   return (
-    <div>
-      <TopBar
-        articleId={articleId}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        handleSearch={handleSearch}
-        handleAdjacent={handleAdjacent}
-        setShowPicker={setShowPicker}
-        handleExtractEntities={handleExtractEntities}
-        extracting={extracting}
-        extractMsg={extractMsg}
-        error={error}
-        handleCompareCleaners={handleCompareCleaners}
-        articleId_forCompare={articleId}
-        setShowNeologisms={setShowNeologisms}
-      />
+    <Routes>
+      <Route path="/" element={
+        <div>
+          <TopBar
+            articleId={articleId}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            handleSearch={handleSearch}
+            handleAdjacent={handleAdjacent}
+            setShowPicker={setShowPicker}
+            handleExtractEntities={handleExtractEntities}
+            extracting={extracting}
+            extractMsg={extractMsg}
+            error={error}
+            handleCompareCleaners={handleCompareCleaners}
+            articleId_forCompare={articleId}
+          />
 
-      <LoadDumpModal
-        showPicker={showPicker}
-        setShowPicker={setShowPicker}
-        date={date}
-        setDate={setDate}
-        handleSubmit={handleSubmit}
-        loading={loading}
-        modalError={modalError}
-      />
+          <LoadDumpModal
+            showPicker={showPicker}
+            setShowPicker={setShowPicker}
+            date={date}
+            setDate={setDate}
+            handleSubmit={handleSubmit}
+            loading={loading}
+            modalError={modalError}
+          />
 
-      {showDiff && (
-        <CleanerDiff
-          results={cleanerResults}
-          loading={cleanerLoading}
-          onClose={() => { setShowDiff(false); setCleanerResults(null) }}
-        />
-      )}
+          {showDiff && (
+            <CleanerDiff
+              results={cleanerResults}
+              loading={cleanerLoading}
+              onClose={() => { setShowDiff(false); setCleanerResults(null) }}
+            />
+          )}
 
-      <NeologismsModal
-        show={showNeologisms}
-        onClose={() => setShowNeologisms(false)}
-      />
-
-      <ArticlePanels
-        articleText={articleText}
-        iframeSrc={iframeSrc}
-        handleTextSelection={handleTextSelection}
-        entities={entities}
-      />
-    </div>
+          <ArticlePanels
+            articleText={articleText}
+            iframeSrc={iframeSrc}
+            handleTextSelection={handleTextSelection}
+            entities={entities}
+          />
+        </div>
+      } />
+      <Route path="/neologisms" element={<NeologismsPage />} />
+    </Routes>
   )
 }
 
