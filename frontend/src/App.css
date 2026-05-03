@@ -306,6 +306,68 @@
   background: #2a2a2a;
 }
 
+.neologisms-table tbody tr.clickable-row {
+  cursor: pointer;
+}
+
+.neologisms-table tbody tr.clickable-row:hover {
+  background: #333;
+}
+
+.neologism-detail-modal {
+  width: 85vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  color: #e0e0e0;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-header button {
+  background: #333;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.detail-meta {
+  color: #888;
+  margin: 0;
+}
+
+.detail-table th:nth-child(1) {
+  width: 25%;
+}
+
+.detail-table th:nth-child(2),
+.detail-table th:nth-child(3) {
+  width: 8%;
+}
+
+.detail-table th:nth-child(4) {
+  width: 59%;
+}
+
+.detail-table td a {
+  color: #4dabf7;
+  text-decoration: none;
+}
+
+.detail-table td a:hover {
+  text-decoration: underline;
+}
+
+.detail-pagination {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
 .no-results {
   text-align: center;
   color: #888;

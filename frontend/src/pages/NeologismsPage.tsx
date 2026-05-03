@@ -3,13 +3,30 @@ import { useSearchParams, Link } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+interface PageInfo {
+    freq: number
+    categories: string[] | null
+    min_depth: number | null
+}
+
+interface NeologismItem {
+    word: string
+    total_freq: number
+    n_pages: number
+    min_depth: number | null
+    pages: Record<string, PageInfo>
+}
+
 export function NeologismsPage() {
     const [searchParams, setSearchParams] = useSearchParams()
-    const [results, setResults] = useState<any[]>([])
+    const [results, setResults] = useState<NeologismItem[]>([])
     const [total, setTotal] = useState(0)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [selectedItem, setSelectedItem] = useState<NeologismItem | null>(null)
+    const [detailOffset, setDetailOffset] = useState(0)
     const limit = 100
+    const detailLimit = 50
 
     const getParam = (key: string) => searchParams.get(key) || ''
     const offset = Number(searchParams.get('offset') || 0)
@@ -31,7 +48,7 @@ export function NeologismsPage() {
             const response = await fetch(`${API_URL}/neologisms?${params.toString()}`)
             if (!response.ok) throw new Error('Failed to fetch data')
             const data = await response.json()
-            setResults(data.results)
+            setResults(data.results as NeologismItem[])
             setTotal(data.total)
         } catch (err: any) {
             setError(err.message)
@@ -77,6 +94,28 @@ export function NeologismsPage() {
 
     const hasNext = offset + limit < total
     const hasPrev = offset > 0
+
+    const openDetail = (item: NeologismItem) => {
+        setSelectedItem(item)
+        setDetailOffset(0)
+    }
+
+    const closeDetail = () => {
+        setSelectedItem(null)
+        setDetailOffset(0)
+    }
+
+    const detailPages = selectedItem ? Object.entries(selectedItem.pages) : []
+    const detailTotal = detailPages.length
+    const detailHasNext = detailOffset + detailLimit < detailTotal
+    const detailHasPrev = detailOffset > 0
+    const detailSlice = detailPages.slice(detailOffset, detailOffset + detailLimit)
+
+    const wikiUrl = (title: string) =>
+        `https://es.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`
+
+    const categoryUrl = (cat: string) =>
+        `https://es.wikipedia.org/wiki/Categoría:${encodeURIComponent(cat.replace(/ /g, '_'))}`
 
     return (
         <div className="neologisms-page">
@@ -129,7 +168,7 @@ export function NeologismsPage() {
                 </thead>
                 <tbody>
                     {results.map((item, i) => (
-                        <tr key={i}>
+                        <tr key={i} onClick={() => openDetail(item)} className="clickable-row">
                             <td>{item.word}</td>
                             <td>{item.total_freq}</td>
                             <td>{item.n_pages}</td>
@@ -147,6 +186,62 @@ export function NeologismsPage() {
                 <span>Showing {total === 0 ? 0 : offset + 1} - {Math.min(offset + limit, total)} of {total}</span>
                 <button onClick={handleNext} disabled={!hasNext || loading}>Next &raquo;</button>
             </div>
+
+            {selectedItem && (
+                <div className="modal-overlay" onClick={closeDetail}>
+                    <div className="modal neologism-detail-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="detail-header">
+                            <h3>{selectedItem.word}</h3>
+                            <button onClick={closeDetail}>Close</button>
+                        </div>
+                        <p className="detail-meta">
+                            {selectedItem.total_freq} occurrences across {selectedItem.n_pages} pages
+                        </p>
+                        <table className="neologisms-table detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Page</th>
+                                    <th>Freq</th>
+                                    <th>Depth</th>
+                                    <th>Categories</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {detailSlice.map(([title, info]) => (
+                                    <tr key={title}>
+                                        <td>
+                                            <a href={wikiUrl(title)} target="_blank" rel="noopener noreferrer">
+                                                {title}
+                                            </a>
+                                        </td>
+                                        <td>{info.freq}</td>
+                                        <td>{info.min_depth ?? '—'}</td>
+                                        <td>
+                                            {info.categories ? (
+                                                info.categories.map((cat, idx) => (
+                                                    <span key={cat}>
+                                                        <a href={categoryUrl(cat)} target="_blank" rel="noopener noreferrer">
+                                                            {cat}
+                                                        </a>
+                                                        {idx < info.categories!.length - 1 && ', '}
+                                                    </span>
+                                                ))
+                                            ) : '—'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {detailTotal > detailLimit && (
+                            <div className="neologisms-pagination detail-pagination">
+                                <button onClick={() => setDetailOffset(Math.max(0, detailOffset - detailLimit))} disabled={!detailHasPrev}>&laquo; Prev</button>
+                                <span>{detailOffset + 1} - {Math.min(detailOffset + detailLimit, detailTotal)} of {detailTotal}</span>
+                                <button onClick={() => setDetailOffset(detailOffset + detailLimit)} disabled={!detailHasNext}>Next &raquo;</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -6,3 +6,4 @@ scripts/extractor/text
 *.env
 index
 data
+AGENTS.md
