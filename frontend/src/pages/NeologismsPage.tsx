@@ -72,10 +72,6 @@ export function NeologismsPage() {
         setSearchParams(next)
     }
 
-    const handleApply = () => {
-        fetchNeologisms(0)
-    }
-
     const handlePrev = () => {
         if (offset > 0) {
             const next = new URLSearchParams(searchParams)
@@ -150,9 +146,6 @@ export function NeologismsPage() {
                     <label>Max Depth: </label>
                     <input type="number" min={0} value={getParam('max_depth')} onChange={e => updateFilter('max_depth', e.target.value)} />
                 </div>
-                <button onClick={handleApply} disabled={loading} className="apply-btn">
-                    {loading ? 'Applying...' : 'Apply Filters'}
-                </button>
             </div>
 
             {error && <p className="error">⚠️ {error}</p>}

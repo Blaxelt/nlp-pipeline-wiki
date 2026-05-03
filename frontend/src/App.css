@@ -266,16 +266,6 @@
   color: #e0e0e0;
 }
 
-.apply-btn {
-  padding: 8px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  height: fit-content;
-}
-
 .neologisms-table {
   width: 100%;
   border-collapse: collapse;
