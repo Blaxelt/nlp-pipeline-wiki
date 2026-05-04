@@ -3,6 +3,12 @@ import { useSearchParams, Link } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
+interface Review {
+    status: 'valid' | 'discarded'
+    reason: string
+    updated_at: string
+}
+
 interface PageInfo {
     freq: number
     categories: string[] | null
@@ -15,6 +21,7 @@ interface NeologismItem {
     n_pages: number
     min_depth: number | null
     pages: Record<string, PageInfo>
+    review: Review | null
 }
 
 export function NeologismsPage() {
@@ -25,6 +32,8 @@ export function NeologismsPage() {
     const [error, setError] = useState('')
     const [selectedItem, setSelectedItem] = useState<NeologismItem | null>(null)
     const [detailOffset, setDetailOffset] = useState(0)
+    const [reviewReason, setReviewReason] = useState('')
+    const [savingReview, setSavingReview] = useState(false)
     const limit = 100
     const detailLimit = 50
 
@@ -42,6 +51,7 @@ export function NeologismsPage() {
             if (getParam('max_freq')) params.append('max_freq', getParam('max_freq'))
             if (getParam('min_depth')) params.append('min_depth', getParam('min_depth'))
             if (getParam('max_depth')) params.append('max_depth', getParam('max_depth'))
+            if (getParam('review_status')) params.append('review_status', getParam('review_status'))
             params.append('offset', currentOffset.toString())
             params.append('limit', limit.toString())
 
@@ -94,11 +104,13 @@ export function NeologismsPage() {
     const openDetail = (item: NeologismItem) => {
         setSelectedItem(item)
         setDetailOffset(0)
+        setReviewReason(item.review?.reason || '')
     }
 
     const closeDetail = () => {
         setSelectedItem(null)
         setDetailOffset(0)
+        setReviewReason('')
     }
 
     const detailPages = selectedItem ? Object.entries(selectedItem.pages) : []
@@ -112,6 +124,47 @@ export function NeologismsPage() {
 
     const categoryUrl = (cat: string) =>
         `https://es.wikipedia.org/wiki/Categoría:${encodeURIComponent(cat.replace(/ /g, '_'))}`
+
+    const saveReview = async (status: 'valid' | 'discarded') => {
+        if (!selectedItem) return
+        setSavingReview(true)
+        try {
+            const response = await fetch(`${API_URL}/neologisms/review`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    word: selectedItem.word,
+                    status,
+                    reason: reviewReason,
+                }),
+            })
+            if (!response.ok) throw new Error('Failed to save review')
+            const data = await response.json()
+            const newReview: Review = data.review
+
+            // Update selected item
+            setSelectedItem({ ...selectedItem, review: newReview })
+
+            // Update results list in place
+            setResults(prev =>
+                prev.map(item =>
+                    item.word === selectedItem.word
+                        ? { ...item, review: newReview }
+                        : item
+                )
+            )
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setSavingReview(false)
+        }
+    }
+
+    const statusBadge = (review: Review | null) => {
+        if (!review) return <span className="badge unreviewed">—</span>
+        if (review.status === 'valid') return <span className="badge valid">Valid</span>
+        return <span className="badge discarded">Discarded</span>
+    }
 
     return (
         <div className="neologisms-page">
@@ -146,6 +199,15 @@ export function NeologismsPage() {
                     <label>Max Depth: </label>
                     <input type="number" min={0} value={getParam('max_depth')} onChange={e => updateFilter('max_depth', e.target.value)} />
                 </div>
+                <div className="filter-group">
+                    <label>Status: </label>
+                    <select value={getParam('review_status')} onChange={e => updateFilter('review_status', e.target.value)}>
+                        <option value="">All</option>
+                        <option value="valid">Valid</option>
+                        <option value="discarded">Discarded</option>
+                        <option value="unreviewed">Unreviewed</option>
+                    </select>
+                </div>
             </div>
 
             {error && <p className="error">⚠️ {error}</p>}
@@ -157,6 +219,7 @@ export function NeologismsPage() {
                         <th>Total Freq</th>
                         <th># Pages</th>
                         <th>Depth</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,6 +229,7 @@ export function NeologismsPage() {
                             <td>{item.total_freq}</td>
                             <td>{item.n_pages}</td>
                             <td>{item.min_depth ?? '—'}</td>
+                            <td>{statusBadge(item.review)}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -187,6 +251,37 @@ export function NeologismsPage() {
                             <h3>{selectedItem.word}</h3>
                             <button onClick={closeDetail}>Close</button>
                         </div>
+
+                        <div className="review-actions">
+                            {statusBadge(selectedItem.review)}
+                            <div className="review-buttons">
+                                <button
+                                    className={`review-btn valid-btn ${selectedItem.review?.status === 'valid' ? 'active' : ''}`}
+                                    onClick={() => saveReview('valid')}
+                                    disabled={savingReview}
+                                >
+                                    {savingReview ? 'Saving…' : 'Mark Valid'}
+                                </button>
+                                <button
+                                    className={`review-btn discard-btn ${selectedItem.review?.status === 'discarded' ? 'active' : ''}`}
+                                    onClick={() => saveReview('discarded')}
+                                    disabled={savingReview}
+                                >
+                                    {savingReview ? 'Saving…' : 'Discard'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="review-reason">
+                            <label>Reason / Comment:</label>
+                            <textarea
+                                rows={2}
+                                value={reviewReason}
+                                onChange={e => setReviewReason(e.target.value)}
+                                placeholder="Optional reason for the review…"
+                            />
+                        </div>
+
                         <p className="detail-meta">
                             {selectedItem.total_freq} occurrences across {selectedItem.n_pages} pages
                         </p>
