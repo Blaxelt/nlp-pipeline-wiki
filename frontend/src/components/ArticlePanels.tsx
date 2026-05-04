@@ -60,7 +60,7 @@ export function ArticlePanels({
                 return (
                     <strong
                         key={index}
-                        style={{ cursor: 'pointer', color: '#0066cc' }}
+                        className="cursor-pointer text-[#0066cc]"
                         onClick={() => window.open(ent.url, '_blank', 'noopener,noreferrer')}
                         title={ent.title}
                     >
@@ -73,17 +73,17 @@ export function ArticlePanels({
     }, [articleText, entities]);
 
     return (
-        <div className="panels">
+        <div className="flex h-screen w-screen overflow-hidden">
             <div
-                className="clean-panel"
+                className="w-1/2 p-5 overflow-y-auto"
                 onMouseUp={handleTextSelection}>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{renderedText}</p>
+                <p className="whitespace-pre-wrap">{renderedText}</p>
             </div>
 
-            <div className="original-panel">
+            <div className="w-1/2 h-full p-5">
                 <iframe
                     src={iframeSrc}
-                    className="original-iframe"
+                    className="w-full h-full border-none"
                     title="Wikipedia Article"
                 />
             </div>
