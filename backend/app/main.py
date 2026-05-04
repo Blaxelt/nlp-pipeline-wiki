@@ -11,11 +11,13 @@ from app.api.routes import neologisms
 from contextlib import asynccontextmanager
 from app.core.wikipedia_index import load_all
 from app.core import article_store
+from app.core import neologism_reviews
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_all()
     article_store.load_latest()
+    neologism_reviews.load()
     yield
 
 app = FastAPI(lifespan=lifespan)
