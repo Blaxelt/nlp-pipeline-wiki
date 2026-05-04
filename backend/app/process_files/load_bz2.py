@@ -75,6 +75,7 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
 
     ids: list[str] = []
     offsets: list[int] = []
+    title_to_id: dict[str, str] = {}
 
     with open(data_path, "w", encoding="utf-8") as f:
         for event, elem in context:
@@ -90,9 +91,10 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
                         skipped += 1
                     else:
                         rev_id = rev_id_el.text if rev_id_el is not None else None
+                        title = title_el.text if title_el is not None else None
                         record = json.dumps({
                             "revision_id": rev_id,
-                            "title": title_el.text if title_el is not None else None,
+                            "title": title,
                             "text": text,
                         }, ensure_ascii=False)
                         offset = f.tell()
@@ -100,7 +102,9 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
                         if rev_id is not None:
                             ids.append(rev_id)
                             offsets.append(offset)
-                        
+                            if title is not None:
+                                title_to_id[title] = rev_id
+
                         total += 1
                         if total % 500 == 0:
                             logger.info("Written %d pages...", total)
@@ -109,7 +113,7 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
 
     # Write companion index file
     with open(index_path, "w", encoding="utf-8") as f:
-        json.dump({"ids": ids, "offsets": offsets}, f)
+        json.dump({"ids": ids, "offsets": offsets, "title_to_id": title_to_id}, f)
     logger.info("Index written: %d entries", len(ids))
 
     return total, skipped

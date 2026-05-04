@@ -1,3 +1,4 @@
+import bisect
 import json
 import logging
 from pathlib import Path
@@ -12,11 +13,20 @@ _ids: list[str] = []           # ordered list of revision_ids
 _id_to_pos: dict[str, int] = {}  # revision_id → position in _ids
 _offsets: list[int] = []       # byte offset per position
 _data_path: Path | None = None  # path to the NDJSON data file
+_title_to_id: dict[str, str] = {}  # original title → revision_id
+_lower_to_id: dict[str, str] = {}  # lowercase title → revision_id
+_sorted_titles: list[tuple[str, str]] = []  # (lowercase_title, original_title) sorted by lowercase
+
+
+def _normalize_title(title: str) -> str:
+    """Replace spaces with underscores for consistent lookup."""
+    return title.replace(" ", "_")
 
 
 def load(date: str) -> None:
     """Load the index for the given dump date into memory."""
     global _ids, _id_to_pos, _offsets, _data_path
+    global _title_to_id, _lower_to_id, _sorted_titles
 
     index_path = DATA_DIR / f"eswiki-{date}-index.json"
     data_path  = DATA_DIR / f"eswiki-{date}-pages-articles.json"
@@ -34,7 +44,18 @@ def load(date: str) -> None:
     _offsets = idx["offsets"]
     _id_to_pos = {rid: pos for pos, rid in enumerate(_ids)}
     _data_path = data_path
-    logger.info("Article index loaded: %d entries", len(_ids))
+
+    _title_to_id = idx.get("title_to_id", {})
+    _lower_to_id = {}
+    _sorted_titles = []
+    for orig_title, rev_id in _title_to_id.items():
+        normalized = _normalize_title(orig_title)
+        lower = normalized.lower()
+        _lower_to_id[lower] = rev_id
+        _sorted_titles.append((lower, normalized))
+    _sorted_titles.sort(key=lambda x: x[0])
+
+    logger.info("Article index loaded: %d entries, %d titles", len(_ids), len(_title_to_id))
 
 
 def load_latest() -> None:
@@ -57,6 +78,41 @@ def get(revision_id: str) -> dict | None:
     with open(_data_path, encoding="utf-8") as f:
         f.seek(_offsets[pos])
         return json.loads(f.readline())
+
+
+def get_by_title(title: str) -> dict | None:
+    """Return the article record for the given title (case-insensitive), or None."""
+    normalized = _normalize_title(title).lower()
+    rev_id = _lower_to_id.get(normalized)
+    if rev_id is None:
+        return None
+    return get(rev_id)
+
+
+def suggest_titles(prefix: str, limit: int = 10) -> list[dict]:
+    """Return up to *limit* titles whose lowercase form starts with *prefix* (case-insensitive).
+
+    Each result is a dict with keys: title (normalized with underscores), revision_id.
+    """
+    if not _sorted_titles or not prefix:
+        return []
+    prefix_lower = _normalize_title(prefix).lower()
+    idx = bisect.bisect_left(_sorted_titles, prefix_lower, key=lambda x: x[0])
+    results: list[dict] = []
+    seen: set[str] = set()
+    for i in range(idx, len(_sorted_titles)):
+        if len(results) >= limit:
+            break
+        lower, normalized = _sorted_titles[i]
+        if not lower.startswith(prefix_lower):
+            break
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        rev_id = _lower_to_id.get(lower)
+        if rev_id is not None:
+            results.append({"title": normalized, "revision_id": rev_id})
+    return results
 
 
 def get_next_id(revision_id: str) -> str | None:

@@ -24,6 +24,20 @@ def load_articles(date: str = Query(..., pattern=r"^\d{8}$", description="Dump d
     return result
 
 
+@router.get("/articles/suggest")
+def suggest_titles(q: str = Query(..., min_length=1, description="Prefix to search for"), limit: int = Query(10, ge=1, le=50)):
+    results = article_store.suggest_titles(q, limit)
+    return {"results": results}
+
+
+@router.get("/articles/by-title/{title}")
+def get_article_by_title(title: str = Path(..., title="Article title")):
+    article = article_store.get_by_title(title)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return {"text": article["text"], "revision_id": article.get("revision_id"), "title": article.get("title")}
+
+
 @router.get("/articles/{article_id}")
 def get_article(article_id: str = Path(..., title="Article ID")):
     article = article_store.get(article_id)
