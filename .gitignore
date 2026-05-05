@@ -7,3 +7,5 @@ scripts/extractor/text
 index
 data
 AGENTS.md
+skills-lock.json
+.agents/

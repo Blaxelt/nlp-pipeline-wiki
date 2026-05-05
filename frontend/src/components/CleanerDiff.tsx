@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { diffWords } from 'diff'
 
-interface CleanerResults {
+export interface CleanerResults {
     wikitextparser: string
     mwparserfromhell: string
     wikiextractor: string
@@ -15,6 +15,8 @@ const LABELS: Record<LibraryName, string> = {
     wikiextractor: 'wikiextractor',
 }
 
+const LIBS = Object.keys(LABELS) as LibraryName[]
+
 interface Props {
     results: CleanerResults | null
     loading: boolean
@@ -22,7 +24,6 @@ interface Props {
 }
 
 export function CleanerDiff({ results, loading, onClose }: Props) {
-    const libs = Object.keys(LABELS) as LibraryName[]
     const [baseLib, setBaseLib] = useState<LibraryName>('wikitextparser')
     const [compareLib, setCompareLib] = useState<LibraryName>('mwparserfromhell')
 
@@ -55,27 +56,27 @@ export function CleanerDiff({ results, loading, onClose }: Props) {
                     <label>
                         Base:
                         <select value={baseLib} onChange={e => setBaseLib(e.target.value as LibraryName)} className="ml-1.5 px-2 py-1 rounded-md border border-[#555] bg-[#2a2a2a] text-[#e0e0e0]">
-                            {libs.map(l => <option key={l} value={l}>{LABELS[l]}</option>)}
+                            {LIBS.map(l => <option key={l} value={l}>{LABELS[l]}</option>)}
                         </select>
                     </label>
                     <span>vs</span>
                     <label>
                         Compare:
                         <select value={compareLib} onChange={e => setCompareLib(e.target.value as LibraryName)} className="ml-1.5 px-2 py-1 rounded-md border border-[#555] bg-[#2a2a2a] text-[#e0e0e0]">
-                            {libs.filter(l => l !== baseLib).map(l => <option key={l} value={l}>{LABELS[l]}</option>)}
+                            {LIBS.filter(l => l !== baseLib).map(l => <option key={l} value={l}>{LABELS[l]}</option>)}
                         </select>
                     </label>
                 </div>
 
                 <div className="flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-[0.85rem] leading-relaxed text-[#d4d4d4] bg-[#252525] p-4 rounded-lg">
-                    {diffParts && diffParts.map((part, i) => (
+                    {diffParts ? diffParts.map((part, i) => (
                         <span
                             key={i}
                             className={part.added ? 'bg-[rgba(40,167,69,0.3)] text-[#7ce87c]' : part.removed ? 'bg-[rgba(220,53,69,0.3)] text-[#f28b8b] line-through' : ''}
                         >
                             {part.value}
                         </span>
-                    ))}
+                    )) : null}
                 </div>
 
                 <div className="flex gap-5 text-[0.8rem]">

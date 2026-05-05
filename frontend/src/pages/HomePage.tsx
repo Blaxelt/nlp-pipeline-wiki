@@ -1,10 +1,18 @@
 import { useState } from 'react'
 import { TopBar } from '../components/TopBar'
 import { LoadDumpModal } from '../components/LoadDumpModal'
-import { ArticlePanels } from '../components/ArticlePanels'
-import { CleanerDiff } from '../components/CleanerDiff'
+import { ArticlePanels, type Entity } from '../components/ArticlePanels'
+import { CleanerDiff, type CleanerResults } from '../components/CleanerDiff'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+function buildIframeSrc(id: string, fragment?: string) {
+  const base = `https://es.wikipedia.org/w/index.php?oldid=${id}`
+  if (fragment) {
+    return `${base}#:~:text=${encodeURIComponent(fragment)}`
+  }
+  return base
+}
 
 export function HomePage() {
   const [articleId, setArticleId] = useState('')
@@ -18,18 +26,10 @@ export function HomePage() {
   const [iframeSrc, setIframeSrc] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [extractMsg, setExtractMsg] = useState('')
-  const [entities, setEntities] = useState<any[]>([])
-  const [cleanerResults, setCleanerResults] = useState<any>(null)
+  const [entities, setEntities] = useState<Entity[]>([])
+  const [cleanerResults, setCleanerResults] = useState<CleanerResults | null>(null)
   const [cleanerLoading, setCleanerLoading] = useState(false)
   const [showDiff, setShowDiff] = useState(false)
-
-  const buildIframeSrc = (id: string, fragment?: string) => {
-    const base = `https://es.wikipedia.org/w/index.php?oldid=${id}`
-    if (fragment) {
-      return `${base}#:~:text=${encodeURIComponent(fragment)}`
-    }
-    return base
-  }
 
   const loadArticle = (id: string, text?: string) => {
     setError('')
@@ -74,8 +74,8 @@ export function HomePage() {
       if (!res.ok) throw new Error('Article not found')
       const data = await res.json()
       loadArticle(data.revision_id, data.text)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }
 
@@ -197,13 +197,13 @@ export function HomePage() {
         modalError={modalError}
       />
 
-      {showDiff && (
+      {showDiff ? (
         <CleanerDiff
           results={cleanerResults}
           loading={cleanerLoading}
           onClose={() => { setShowDiff(false); setCleanerResults(null) }}
         />
-      )}
+      ) : null}
 
       <ArticlePanels
         articleText={articleText}
