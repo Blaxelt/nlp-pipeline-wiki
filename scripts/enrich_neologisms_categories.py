@@ -38,17 +38,24 @@ def main():
             cats = article_cats.get(page_title, [])
             # Filter to only categories that have a depth (reachable from root)
             depths = [cat_depth[c] for c in cats if c in cat_depth]
-            min_d = min(depths) if depths else None
+            mean_d = round(sum(depths) / len(depths), 2) if depths else None
 
             enriched_pages[page_title] = {
                 "freq": freq,
                 "categories": cats if cats else None,
-                "min_depth": min_d,
+                "mean_depth": mean_d,
             }
             if cats:
                 matched += 1
             else:
                 unmatched += 1
+
+        # Count distinct categories across all pages for this word
+        distinct_cats = set()
+        for page_data in enriched_pages.values():
+            if page_data.get("categories"):
+                distinct_cats.update(page_data["categories"])
+        entry["num_categories"] = len(distinct_cats)
 
         entry["pages"] = enriched_pages
 

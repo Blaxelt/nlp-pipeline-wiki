@@ -132,7 +132,7 @@ export function TopBar({
                                 setShowSuggestions(true)
                             }
                         }}
-                        className="p-[3px] bg-[#2a2a2a] border border-[#555] rounded text-[#e0e0e0] w-72"
+                        className="p-0.75 bg-[#2a2a2a] border border-[#555] rounded text-[#e0e0e0] w-72"
                     />
                     {showSuggestions && (
                         <div

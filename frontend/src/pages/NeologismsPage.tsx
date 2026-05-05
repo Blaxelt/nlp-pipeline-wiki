@@ -12,14 +12,15 @@ interface Review {
 interface PageInfo {
     freq: number
     categories: string[] | null
-    min_depth: number | null
+    mean_depth: number | null
 }
 
 interface NeologismItem {
     word: string
     total_freq: number
     n_pages: number
-    min_depth: number | null
+    mean_depth: number | null
+    num_categories: number
     pages: Record<string, PageInfo>
     review: Review | null
 }
@@ -212,13 +213,14 @@ export function NeologismsPage() {
 
             {error && <p className="text-red-500">⚠️ {error}</p>}
 
-            <table className="w-full border-collapse text-left mb-4 table-fixed [&_th:nth-child(1)]:w-[35%] [&_th:nth-child(2)]:w-[15%] [&_th:nth-child(3)]:w-[15%] [&_th:nth-child(4)]:w-[15%] [&_th:nth-child(5)]:w-[20%]">
+            <table className="w-full border-collapse text-left mb-4 table-fixed [&_th:nth-child(1)]:w-[30%] [&_th:nth-child(2)]:w-[12%] [&_th:nth-child(3)]:w-[12%] [&_th:nth-child(4)]:w-[12%] [&_th:nth-child(5)]:w-[14%] [&_th:nth-child(6)]:w-[20%]">
                 <thead>
                     <tr>
                         <th className="p-2 border-b border-[#444] wrap-break-word bg-[#2a2a2a]">Word</th>
                         <th className="p-2 border-b border-[#444] wrap-break-word bg-[#2a2a2a]">Total Freq</th>
                         <th className="p-2 border-b border-[#444] wrap-break-word bg-[#2a2a2a]"># Pages</th>
                         <th className="p-2 border-b border-[#444] wrap-break-word bg-[#2a2a2a]">Depth</th>
+                        <th className="p-2 border-b border-[#444] wrap-break-word bg-[#2a2a2a]"># Cats</th>
                         <th className="p-2 border-b border-[#444] wrap-break-word bg-[#2a2a2a]">Status</th>
                     </tr>
                 </thead>
@@ -228,7 +230,8 @@ export function NeologismsPage() {
                             <td className="p-2 border-b border-[#444] wrap-break-word">{item.word}</td>
                             <td className="p-2 border-b border-[#444] wrap-break-word">{item.total_freq}</td>
                             <td className="p-2 border-b border-[#444] wrap-break-word">{item.n_pages}</td>
-                            <td className="p-2 border-b border-[#444] wrap-break-word">{item.min_depth ?? '—'}</td>
+                            <td className="p-2 border-b border-[#444] wrap-break-word">{item.mean_depth ?? '—'}</td>
+                            <td className="p-2 border-b border-[#444] wrap-break-word">{item.num_categories}</td>
                             <td className="p-2 border-b border-[#444] wrap-break-word">{statusBadge(item.review)}</td>
                         </tr>
                     ))}
@@ -304,7 +307,7 @@ export function NeologismsPage() {
                                             </a>
                                         </td>
                                         <td className="p-2 border-b border-[#444] wrap-break-word">{info.freq}</td>
-                                        <td className="p-2 border-b border-[#444] wrap-break-word">{info.min_depth ?? '—'}</td>
+                                        <td className="p-2 border-b border-[#444] wrap-break-word">{info.mean_depth ?? '—'}</td>
                                         <td className="p-2 border-b border-[#444] wrap-break-word">
                                             {info.categories ? (
                                                 info.categories.map((cat, idx) => (

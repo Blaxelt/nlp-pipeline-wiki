@@ -16,14 +16,19 @@ def load_neologisms():
         return []
     with open(_NEOLOGISMS_FILE, "r", encoding="utf-8") as f:
         raw = json.load(f)
-    # Pre-compute word-level min_depth (minimum across all pages, ignoring nulls)
+    # Pre-compute word-level mean_depth and num_categories
     for item in raw:
-        depths = [
-            page.get("min_depth")
-            for page in item.get("pages", {}).values()
-            if page.get("min_depth") is not None
-        ]
-        item["min_depth"] = min(depths) if depths else None
+        depths = []
+        distinct_cats: set[str] = set()
+        for page in item.get("pages", {}).values():
+            d = page.get("mean_depth") if page.get("mean_depth") is not None else page.get("min_depth")
+            if d is not None:
+                depths.append(d)
+            cats = page.get("categories")
+            if cats:
+                distinct_cats.update(cats)
+        item["mean_depth"] = round(sum(depths) / len(depths), 2) if depths else None
+        item["num_categories"] = len(distinct_cats)
     return raw
 
 @router.get("/neologisms")
@@ -32,8 +37,8 @@ def get_neologisms(
     max_pages: Optional[int] = Query(None, description="Maximum number of pages"),
     min_freq: Optional[int] = Query(None, description="Minimum total frequency"),
     max_freq: Optional[int] = Query(None, description="Maximum total frequency"),
-    min_depth: Optional[int] = Query(None, description="Minimum category depth (word-level)"),
-    max_depth: Optional[int] = Query(None, description="Maximum category depth (word-level)"),
+    min_depth: Optional[int] = Query(None, description="Minimum mean category depth (word-level)"),
+    max_depth: Optional[int] = Query(None, description="Maximum mean category depth (word-level)"),
     review_status: Optional[str] = Query(None, description="Filter by review status: valid, discarded, unreviewed"),
     limit: int = Query(100, description="Max results to return"),
     offset: int = Query(0, description="Offset for pagination"),
@@ -53,7 +58,7 @@ def get_neologisms(
             continue
         if max_freq is not None and item.get("total_freq", 0) > max_freq:
             continue
-        word_depth = item.get("min_depth")
+        word_depth = item.get("mean_depth")
         if min_depth is not None:
             if word_depth is None or word_depth < min_depth:
                 continue
