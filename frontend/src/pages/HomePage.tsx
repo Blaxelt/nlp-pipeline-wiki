@@ -31,12 +31,16 @@ export function HomePage() {
     return base
   }
 
-  const loadArticle = (id: string) => {
+  const loadArticle = (id: string, text?: string) => {
     setError('')
     setArticleId(id)
     setInputValue(id)
     setIframeSrc(buildIframeSrc(id))
     setEntities([])
+    if (text !== undefined) {
+      setArticleText(text)
+      return
+    }
     fetch(`${API_URL}/articles/${id}`)
       .then(response => {
         if (!response.ok) throw new Error('Article not found')
@@ -46,16 +50,33 @@ export function HomePage() {
       .catch(error => setError(error.message))
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!inputValue.trim()) {
       setError('Enter a revision ID')
       return
     }
-    if (isNaN(Number(inputValue))) {
-      setError('ID must be a number')
+    setError('')
+
+    const trimmed = inputValue.trim()
+    if (isNaN(Number(trimmed))) {
+      setError('Revision ID must be a number')
       return
     }
-    loadArticle(inputValue)
+
+    loadArticle(trimmed)
+  }
+
+  const handleLoadByTitle = async (title: string) => {
+    setError('')
+    setEntities([])
+    try {
+      const res = await fetch(`${API_URL}/articles/by-title/${encodeURIComponent(title)}`)
+      if (!res.ok) throw new Error('Article not found')
+      const data = await res.json()
+      loadArticle(data.revision_id, data.text)
+    } catch (err: any) {
+      setError(err.message)
+    }
   }
 
   const handleAdjacent = (direction: 'next' | 'prev') => {
@@ -163,6 +184,7 @@ export function HomePage() {
         error={error}
         handleCompareCleaners={handleCompareCleaners}
         articleId_forCompare={articleId}
+        onSelectTitle={handleLoadByTitle}
       />
 
       <LoadDumpModal
