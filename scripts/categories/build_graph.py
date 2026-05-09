@@ -204,7 +204,7 @@ def main():
     parser.add_argument(
         "--data-dir",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "data" / "categories",
+        default=Path(__file__).resolve().parent.parent.parent / "data" / "categories",
         help="Directory containing the SQL dumps",
     )
     parser.add_argument(

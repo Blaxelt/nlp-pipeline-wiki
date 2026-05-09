@@ -63,13 +63,13 @@ def main():
     parser.add_argument(
         "--depth-file",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "data" / "categories" / "category_depth.json",
+        default=Path(__file__).resolve().parent.parent.parent / "data" / "categories" / "category_depth.json",
         help="Path to the category_depth.json file",
     )
     parser.add_argument(
         "--graph-file",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / "data" / "categories" / "category_graph.json",
+        default=Path(__file__).resolve().parent.parent.parent / "data" / "categories" / "category_graph.json",
         help="Path to the category_graph.json file",
     )
     args = parser.parse_args()

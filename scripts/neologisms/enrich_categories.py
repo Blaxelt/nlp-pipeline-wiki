@@ -3,7 +3,7 @@ import sys
 import time
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 FREQ_DIR = DATA_DIR / "frequency"
 CAT_DIR = DATA_DIR / "categories"
 
