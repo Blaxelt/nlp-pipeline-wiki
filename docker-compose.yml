@@ -2,7 +2,7 @@ services:
   backend:
     build: ./backend
     environment:
-      CORS_ORIGINS: "http://localhost:5173"
+      CORS_ORIGINS: "http://localhost"
     expose:
       - "8000"
 
@@ -12,6 +12,3 @@ services:
       - backend
     ports:
       - "80:80"
-
-volumes:
-  pgdata:
