@@ -32,24 +32,31 @@ export function ArticlePanels({
         const validEntities = entities.filter(e => e.text && e.text.trim().length > 0);
         if (validEntities.length === 0) return articleText;
 
-        // Priority by length - longest first
+        // Deduplicate by text, then also index by title for broader matching.
+        // Priority by length - longest first so longer matches take precedence in regex alternation.
         const sortedEntities = [...validEntities].sort((a, b) => b.text.length - a.text.length);
 
-        // Map lookup - O(1) matching
         const entityMap = new Map<string, Entity>();
+        const seenKeys = new Set<string>();
         for (const ent of sortedEntities) {
-            if (!entityMap.has(ent.text)) {
-                entityMap.set(ent.text, ent);
+            for (const key of [ent.text, ent.title]) {
+                if (key && key.trim().length > 0 && !seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    entityMap.set(key, ent);
+                }
             }
         }
 
         // Regex splitting - single alternation regex with capturing group
-        const pattern = Array.from(entityMap.keys()).map(escapeRegExp).join('|');
+        // Sort pattern keys longest-first so regex prefers longer matches
+        const pattern = Array.from(entityMap.keys())
+            .sort((a, b) => b.length - a.length)
+            .map(escapeRegExp)
+            .join('|');
         if (!pattern) return articleText;
 
-        // Only check left boundary: entity must not be preceded by a letter/number/underscore.
-        // No right boundary check, so "valle" matches inside "valles" ([[valle]]s wikitext pattern).
-        const regex = new RegExp(`(?<![\\p{L}\\p{N}_])(${pattern})`, 'gu');
+        // Full word boundary: entity must not be preceded or followed by a letter/number/underscore.
+        const regex = new RegExp(`(?<![\\p{L}\\p{N}_])(${pattern})(?![\\p{L}\\p{N}_])`, 'gu');
 
         // This split preserves the matched entities, everything else is split around them
         const parts = articleText.split(regex);
