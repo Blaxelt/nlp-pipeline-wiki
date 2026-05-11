@@ -28,8 +28,12 @@ def load(date: str) -> None:
     global _ids, _id_to_pos, _offsets, _data_path
     global _title_to_id, _lower_to_id, _sorted_titles
 
-    index_path = DATA_DIR / f"eswiki-{date}-index.json"
-    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles.json"
+    # Prefer -clean files (improved text extraction), fall back to original
+    index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
+    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-clean.json"
+    if not index_path.exists() or not data_path.exists():
+        index_path = DATA_DIR / f"eswiki-{date}-index.json"
+        data_path  = DATA_DIR / f"eswiki-{date}-pages-articles.json"
 
     if not index_path.exists():
         raise FileNotFoundError(f"Index file not found: {index_path}")
@@ -60,10 +64,14 @@ def load(date: str) -> None:
 
 def load_latest() -> None:
     """Load the index for the most recent dump found in data/. Used when starting the server."""
-    files = sorted(DATA_DIR.glob("eswiki-*-index.json"))
+    # Prefer -clean index files, fall back to original
+    files = sorted(DATA_DIR.glob("eswiki-*-index-clean.json"))
+    if not files:
+        files = sorted(DATA_DIR.glob("eswiki-*-index.json"))
     if not files:
         logger.warning("No index file found in %s — article store is empty", DATA_DIR)
         return
+    # Extract date: eswiki-20260301-index-clean.json -> 20260301
     date = files[-1].name.split("-")[1]
     load(date)
 

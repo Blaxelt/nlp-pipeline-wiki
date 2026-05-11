@@ -4,8 +4,8 @@ from collections import Counter
 from pathlib import Path
 
 script_dir  = Path(__file__).resolve().parent
-input_path  = (script_dir / '../../data/eswiki-20251020-pages-articles.json').resolve()
-output_path = (script_dir / '../../data/frequency/eswiki_20251020_word_frequencies.txt').resolve()
+input_path  = (script_dir / '../../data/eswiki-20260301-pages-articles-clean.json').resolve()
+output_path = (script_dir / '../../data/frequency/eswiki_20260301_word_frequencies_clean.txt').resolve()
 
 if not input_path.exists():
     print(f"Error: Input file not found at {input_path}")

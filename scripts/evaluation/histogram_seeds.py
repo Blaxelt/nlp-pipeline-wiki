@@ -8,11 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
 def load_dictionary(dict_path: Path) -> set:
     print(f"Loading dictionary from {dict_path} …")
     with open(dict_path, "r", encoding="utf-8") as fh:
@@ -74,11 +69,6 @@ def sample_articles(json_path: Path, valid_words: set, n: int, seed: int) -> lis
 
     return results
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     base_dir = Path(__file__).resolve().parent.parent.parent
@@ -87,8 +77,8 @@ def main():
     parser.add_argument("--bins",       type=int, default=40,   help="Number of histogram bins (default: 40)")
     parser.add_argument(
         "--input",
-        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-no-redirects.json"),
-        help="Path to input NDJSON file (default: eswiki-20260301-pages-articles-no-redirects.json)",
+        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-no-redirects-clean.json"),
+        help="Path to input NDJSON file (default: eswiki-20260301-pages-articles-no-redirects-clean.json)",
     )
     args = parser.parse_args()
 
@@ -105,9 +95,7 @@ def main():
 
     valid_words = load_dictionary(dict_path)
 
-    # -----------------------------------------------------------------------
-    # Sample
-    # -----------------------------------------------------------------------
+
     all_data: list[list[float]] = []
     for seed in range(1, N_SEEDS + 1):
         print(f"\n[Seed {seed}/{N_SEEDS}] Sampling {N_ARTICLES} articles …")
@@ -115,9 +103,6 @@ def main():
         all_data.append(data)
         print(f"  → {len(data)} valid articles | mean={np.mean(data):.2f}%  std={np.std(data):.2f}%")
 
-    # -----------------------------------------------------------------------
-    # Plot
-    # -----------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(12, 6))
 
     colors = cm.tab20(np.linspace(0, 1, N_SEEDS))
@@ -152,7 +137,7 @@ def main():
     ax.set_xlim(0, 100)
     ax.grid(axis="y", linestyle="--", alpha=0.4)
 
-    out_path = Path(__file__).resolve().parent / f"histogram_seeds{N_SEEDS}_art{N_ARTICLES}.png"
+    out_path = Path(__file__).resolve().parent / f"histogram_seeds{N_SEEDS}_art{N_ARTICLES}_clean.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     print(f"\nFigura guardada en: {out_path}")
     plt.show()

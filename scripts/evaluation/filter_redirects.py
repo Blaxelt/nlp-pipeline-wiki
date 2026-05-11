@@ -1,22 +1,3 @@
-"""
-filter_redirects.py
--------------------
-Reads the clean Wikipedia NDJSON line by line and writes a new file that
-has redirect articles removed.
-
-A redirect is any article whose clean_text starts with:
-  #REDIRECCIÓN[[   (Spanish)
-  #REDIRECT[[      (English)
-
-Usage
------
-    python scripts/evaluation/filter_redirects.py [--input FILE] [--output FILE]
-
-Defaults:
-  --input  data/eswiki-20260301-pages-articles.json
-  --output data/eswiki-20260301-pages-articles-no-redirects.json
-"""
-
 import argparse
 import json
 from pathlib import Path
@@ -36,12 +17,12 @@ def main():
 
     parser.add_argument(
         "--input",
-        default=str(base_dir / "data" / "eswiki-20260301-pages-articles.json"),
-        help="Input NDJSON file (default: eswiki-20260301-pages-articles.json)",
+        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-clean.json"),
+        help="Input NDJSON file (default: eswiki-20260301-pages-articles-clean.json)",
     )
     parser.add_argument(
         "--output",
-        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-no-redirects.json"),
+        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-no-redirects-clean.json"),
         help="Output NDJSON file",
     )
     args = parser.parse_args()

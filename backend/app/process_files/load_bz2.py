@@ -21,31 +21,95 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 
 
+_NAVIGATION_LABELS = {
+    "extracto": "Ver",
+    "ap": "Artículo principal",
+    "artículo principal": "Artículo principal",
+    "vt": "Véase también",
+    "véase también": "Véase también",
+    "cp": "Contenido parcial",
+    "ver": "Véase también",
+}
+
+_FORMATTING_TEMPLATES = frozenset({"small", "formatnum", "nowrap", "nobold", "nolink"})
+
+_TEMPLATE_PREPROCESS_RE = re.compile(
+    r"\{\{\s*(Plantilla:\s*)?"
+    r"(Extracto|AP|Artículo[\s_]principal|VT|Véase[\s_]también|CP|Ver|small|formatnum|nowrap|nobold|nolink)"
+    r"(?:\s*\|\s*([^{}]*))?\s*\}\}",
+    re.IGNORECASE,
+)
+
+
+def _replace_known_template(m: re.Match) -> str:
+    name = m.group(2).strip().lower().replace("_", " ")
+    args_str = m.group(3)
+
+    positional = []
+    if args_str:
+        for arg in args_str.split("|"):
+            arg = arg.strip()
+            if "=" in arg:
+                key, _, val = arg.partition("=")
+                if key.strip().isdigit():
+                    arg = val.strip()
+                else:
+                    continue
+            if arg:
+                positional.append(arg)
+
+    if name in _NAVIGATION_LABELS:
+        label = _NAVIGATION_LABELS[name]
+        if positional:
+            return f"[{label}: {', '.join(positional)}]"
+        return ""
+
+    if name in _FORMATTING_TEMPLATES:
+        return positional[0] if positional else ""
+
+    return m.group(0)
+
+
+def _preprocess_wikitext(wikitext: str) -> str:
+    return _TEMPLATE_PREPROCESS_RE.sub(_replace_known_template, wikitext)
+
+
 def _get_plain_text(revision, ns):
     text_el = revision.find(f"{ns}text")
     if text_el is None or text_el.text is None:
         return None
-    parsed = wtp.parse(text_el.text)
 
-    for ref in parsed.get_tags("ref"): # Delete references
+    preprocessed = _preprocess_wikitext(text_el.text)
+    parsed = wtp.parse(preprocessed)
+
+    for ref in parsed.get_tags("ref"):
         try:
             ref.contents = ""
         except AttributeError:
-            # Some malformed <ref> tags in the dump cause wikitextparser's
-            # internal regex to return None, making .span() crash.
-            # We skip those refs and continue processing the rest of the page.
             pass
 
-    # Delete templates (e.g., infoboxes) so their wikilinks are ignored.
-    # wikitextparser's plain_text() drops templates anyway, so we
-    # remove them explicitly from the AST to also drop their wikilinks.
+    for math in parsed.get_tags("math"):
+        try:
+            math.contents = ""
+        except AttributeError:
+            pass
+
+    for table in parsed.tables:
+        try:
+            table.string = ""
+        except Exception:
+            pass
+
     for tpl in parsed.templates:
         try:
             tpl.string = ""
         except Exception:
             pass
-            
-    return parsed.plain_text().strip()
+
+    try:
+        return parsed.plain_text().strip()
+    except AttributeError:
+        return re.sub(r"\{\{[^}]*\}\}", "", preprocessed).strip()
 
 
 def _download_bz2(date: str) -> Path:
@@ -135,8 +199,8 @@ def run(date: str) -> dict:
         raise ValueError(f"Invalid date '{date}': must be 8 digits, e.g. 20260301")
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles.json"
-    index_path = DATA_DIR / f"eswiki-{date}-index.json"
+    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-clean.json"
+    index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
  
     start = time.time()
     bz2_path = _download_bz2(date)
