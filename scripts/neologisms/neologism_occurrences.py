@@ -4,9 +4,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 script_dir  = Path(__file__).resolve().parent
-neo_path    = (script_dir / '../../data/frequency/eswiki_neologisms_20260301_20251020.txt').resolve()
-json_path   = (script_dir / '../../data/eswiki-20260301-pages-articles.json').resolve()
-output_path = (script_dir / '../../data/frequency/eswiki_neologisms_occurrences.json').resolve()
+neo_path    = (script_dir / '../../data/frequency/eswiki_neologisms_20260301_20251020_clean.txt').resolve()
+json_path   = (script_dir / '../../data/eswiki-20260301-pages-articles-clean.json').resolve()
+output_path = (script_dir / '../../data/frequency/eswiki_neologisms_occurrences_clean.json').resolve()
 
 # We use the identical regex from compute_frequencies.py
 WORD_RE = re.compile(r"[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]+|\d+|[^\w\s]", re.UNICODE)

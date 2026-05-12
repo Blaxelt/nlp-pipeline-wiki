@@ -24,7 +24,7 @@ def main():
 
     # Load neologisms
     print("Loading neologisms …")
-    with open(FREQ_DIR / "eswiki_neologisms_occurrences.json", encoding="utf-8") as f:
+    with open(FREQ_DIR / "eswiki_neologisms_occurrences_clean.json", encoding="utf-8") as f:
         neologisms: list[dict] = json.load(f)
     print(f"  {len(neologisms):,} neologism entries")
 
@@ -62,7 +62,7 @@ def main():
     print(f"  Pages matched: {matched:,}, unmatched: {unmatched:,}")
 
     # Save
-    out_path = FREQ_DIR / "eswiki_neologisms_occurrences_enriched.json"
+    out_path = FREQ_DIR / "eswiki_neologisms_occurrences_enriched_clean.json"
     print(f"Saving to {out_path.name} …")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(neologisms, f, ensure_ascii=False, indent=2)

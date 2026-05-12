@@ -8,7 +8,7 @@ from app.core import neologism_reviews
 router = APIRouter()
 
 _DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
-_NEOLOGISMS_FILE = _DATA_DIR / "frequency" / "eswiki_neologisms_occurrences_enriched.json"
+_NEOLOGISMS_FILE = _DATA_DIR / "frequency" / "eswiki_neologisms_occurrences_enriched_clean.json"
 
 @lru_cache(maxsize=1)
 def load_neologisms():
