@@ -1,6 +1,6 @@
-# esdbpedia
+# MSc thesis project
 
-Web application for reviewing Spanish Wikipedia article extraction and cleaning quality. Future work involves extending it to more languages.
+Web application for reviewing Spanish Wikipedia article extraction and cleaning quality.
 
 ## Architecture
 
@@ -20,11 +20,14 @@ Web application for reviewing Spanish Wikipedia article extraction and cleaning 
 - **Quality evaluation scripts** - Dictionary coverage histograms, category depth analysis, Zipf distribution plots.
 
 ## Quick Start
-
-Requires [Docker](https://www.docker.com/)
-
-//ToDo
-
+Requires [Docker](https://www.docker.com/).
+The easiest way to run the application is with the production Docker Compose file:
+1. Download [`docker-compose.prod.yml`](docker-compose.prod.yml) into a folder by itself.
+2. Run:
+   ```bash
+   docker compose -f docker-compose.prod.yml up -d
+3. Docker will pull the images and start the containers automatically.
+4. Then open http://localhost in your browser.
 
 ## References
 
