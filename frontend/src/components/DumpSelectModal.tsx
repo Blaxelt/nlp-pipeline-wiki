@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -15,12 +15,10 @@ export function DumpSelectModal({ onLoad, onClose, currentDump }: DumpSelectModa
     const [fetchingDumps, setFetchingDumps] = useState(true)
     const [fetchError, setFetchError] = useState('')
     const [selected, setSelected] = useState<string>(currentDump || '')
-    const [loaded, setLoaded] = useState(false)
     const [loadingDump, setLoadingDump] = useState(false)
     const [loadError, setLoadError] = useState('')
 
-    if (!loaded) {
-        setLoaded(true)
+    useEffect(() => {
         fetch(`${API_URL}/articles/available-dumps`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch dumps')
@@ -32,7 +30,7 @@ export function DumpSelectModal({ onLoad, onClose, currentDump }: DumpSelectModa
             })
             .catch(err => setFetchError(err.message))
             .finally(() => setFetchingDumps(false))
-    }
+    }, [])
 
     const handleLoad = useCallback(() => {
         if (!selected || loadingDump) return

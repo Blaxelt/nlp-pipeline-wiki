@@ -76,6 +76,25 @@ def get_prev_article(article_id: str = Path(..., title="Article ID")):
     return {"id": prev_id}
 
 
+def _fetch_wikitext(rev_id: str) -> tuple[str, dict]:
+    """Fetch wikitext for a revision from the Wikipedia API.
+    Returns (wikitext, page_dict)."""
+    api_url = (
+        "https://es.wikipedia.org/w/api.php"
+        f"?action=query&prop=revisions&revids={rev_id}"
+        "&rvprop=content&rvslots=main&format=json"
+    )
+    req = urllib.request.Request(api_url, headers={"User-Agent": "MSc student (b.tluo@alumnos.upm.es) retrieving wikitext for master thesis (educational use)"})
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+        page = next(iter(data["query"]["pages"].values()))
+        wikitext = page["revisions"][0]["slots"]["main"]["*"]
+        return wikitext, page
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Wikipedia API error: {exc}")
+
+
 @router.post("/articles/{article_id}/extract-entities")
 def extract_article_entities(article_id: str = Path(..., title="Article ID")):
     """Fetch wikitext for the given revision from the Wikipedia API, extract
@@ -84,21 +103,7 @@ def extract_article_entities(article_id: str = Path(..., title="Article ID")):
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
 
-    # Fetch original wikitext for this specific revision id
-    api_url = (
-        "https://es.wikipedia.org/w/api.php"
-        f"?action=query&prop=revisions&revids={article_id}"
-        "&rvprop=content&rvslots=main&format=json"
-    )
-    try:
-        req = urllib.request.Request(api_url, headers={"User-Agent": "MSc student (b.tluo@alumnos.upm.es) retrieving wikitext for master thesis (educational use)"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read())
-        pages = data["query"]["pages"]
-        page = next(iter(pages.values()))
-        wikitext = page["revisions"][0]["slots"]["main"]["*"]
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Wikipedia API error: {exc}")
+    wikitext, _ = _fetch_wikitext(article_id)
 
     # Parse and strip templates
     parsed = wtp.parse(wikitext)
@@ -124,25 +129,10 @@ def extract_article_entities(article_id: str = Path(..., title="Article ID")):
 @router.get("/articles/{article_id}/compare-cleaners")
 def compare_cleaners(article_id: str = Path(..., title="Article ID")):
     """Fetch wikitext once and run all three cleaning libraries on it."""
-    article = article_store.get(article_id)
-    if not article:
+    if not article_store.get(article_id):
         raise HTTPException(status_code=404, detail="Article not found")
 
-    # Fetch original wikitext
-    api_url = (
-        "https://es.wikipedia.org/w/api.php"
-        f"?action=query&prop=revisions&revids={article_id}"
-        "&rvprop=content&rvslots=main&format=json"
-    )
-    try:
-        req = urllib.request.Request(api_url, headers={"User-Agent": "MSc student (b.tluo@alumnos.upm.es) retrieving wikitext for master thesis (educational use)"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read())
-        pages = data["query"]["pages"]
-        page = next(iter(pages.values()))
-        wikitext = page["revisions"][0]["slots"]["main"]["*"]
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Wikipedia API error: {exc}")
+    wikitext, page = _fetch_wikitext(article_id)
 
     from app.process_files.cleaners import (
         clean_mwparserfromhell,
