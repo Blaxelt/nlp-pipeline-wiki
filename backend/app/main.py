@@ -32,6 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 app.include_router(articles.router)
 app.include_router(wikipedia_urls.router)
 app.include_router(neologisms.router)

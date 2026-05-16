@@ -14,6 +14,20 @@ router = APIRouter()
 _DATA_DIR = FilePath(__file__).parent.parent.parent.parent.parent / "data"
 
 
+@router.get("/articles/available-dumps")
+def list_dumps():
+    return {"available": article_store.list_available(), "current": article_store.get_current_date()}
+
+
+@router.post("/articles/load-existing")
+def load_existing(date: str = Query(..., pattern=r"^\d{8}$", description="Dump date in YYYYMMDD format")):
+    try:
+        article_store.load(date)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return {"date": date, "status": "loaded"}
+
+
 @router.post("/articles/load")
 def load_articles(date: str = Query(..., pattern=r"^\d{8}$", description="Dump date in YYYYMMDD format, e.g. 20260301")):
     try:

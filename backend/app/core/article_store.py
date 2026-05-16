@@ -16,6 +16,7 @@ _data_path: Path | None = None  # path to the NDJSON data file
 _title_to_id: dict[str, str] = {}  # original title → revision_id
 _lower_to_id: dict[str, str] = {}  # lowercase title → revision_id
 _sorted_titles: list[tuple[str, str]] = []  # (lowercase_title, original_title) sorted by lowercase
+_current_date: str | None = None
 
 
 def _normalize_title(title: str) -> str:
@@ -23,10 +24,26 @@ def _normalize_title(title: str) -> str:
     return title.replace(" ", "_")
 
 
+def list_available() -> list[str]:
+    """Return list of available dump dates, newest first."""
+    dates: set[str] = set()
+    for path in DATA_DIR.glob("eswiki-*-index*.json"):
+        parts = path.name.split("-")
+        if len(parts) < 2:
+            continue
+        dates.add(parts[1])
+    return sorted(dates, reverse=True)
+
+
+def get_current_date() -> str | None:
+    """Return the date of the currently loaded dump, or None."""
+    return _current_date
+
+
 def load(date: str) -> None:
     """Load the index for the given dump date into memory."""
     global _ids, _id_to_pos, _offsets, _data_path
-    global _title_to_id, _lower_to_id, _sorted_titles
+    global _title_to_id, _lower_to_id, _sorted_titles, _current_date
 
     # Prefer -clean files (improved text extraction), fall back to original
     index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
@@ -59,6 +76,7 @@ def load(date: str) -> None:
         _sorted_titles.append((lower, normalized))
     _sorted_titles.sort(key=lambda x: x[0])
 
+    _current_date = date
     logger.info("Article index loaded: %d entries, %d titles", len(_ids), len(_title_to_id))
 
 

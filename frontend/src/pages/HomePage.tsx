@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { TopBar } from '../components/TopBar'
 import { LoadDumpModal } from '../components/LoadDumpModal'
+import { DumpSelectModal } from '../components/DumpSelectModal'
 import { ArticlePanels, type Entity } from '../components/ArticlePanels'
 import { CleanerDiff, type CleanerResults } from '../components/CleanerDiff'
 
@@ -14,7 +15,11 @@ function buildIframeSrc(id: string, fragment?: string) {
   return base
 }
 
+type Phase = 'starting' | 'selecting' | 'ready'
+
 export function HomePage() {
+  const [phase, setPhase] = useState<Phase>('starting')
+  const [currentDump, setCurrentDump] = useState<string | null>(null)
   const [articleId, setArticleId] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [articleText, setArticleText] = useState('')
@@ -30,6 +35,55 @@ export function HomePage() {
   const [cleanerResults, setCleanerResults] = useState<CleanerResults | null>(null)
   const [cleanerLoading, setCleanerLoading] = useState(false)
   const [showDiff, setShowDiff] = useState(false)
+
+  useEffect(() => {
+    if (phase !== 'starting') return
+    fetch(`${API_URL}/health`)
+      .then(res => {
+        if (!res.ok) throw new Error('not ready')
+        return fetch(`${API_URL}/articles/available-dumps`)
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('not ready')
+        return res.json()
+      })
+      .then(data => {
+        if (data.current) {
+          setCurrentDump(data.current)
+          setPhase('ready')
+        } else {
+          setPhase('selecting')
+        }
+      })
+      .catch(() => {
+        const poll = setInterval(() => {
+          fetch(`${API_URL}/health`)
+            .then(res => {
+              if (res.ok) {
+                clearInterval(poll)
+                return fetch(`${API_URL}/articles/available-dumps`)
+              }
+              return null
+            })
+            .then(res => res ? res.json() : null)
+            .then(data => {
+              if (!data) return
+              if (data.current) {
+                setCurrentDump(data.current)
+                setPhase('ready')
+              } else {
+                setPhase('selecting')
+              }
+            })
+            .catch(() => {})
+        }, 1000)
+      })
+  }, [phase])
+
+  const handleSelectDump = (date: string) => {
+    setCurrentDump(date)
+    setPhase('ready')
+  }
 
   const loadArticle = (id: string, text?: string) => {
     setError('')
@@ -167,6 +221,18 @@ export function HomePage() {
       setExtracting(false)
       setTimeout(() => setExtractMsg(''), 4000)
     }
+  }
+
+  if (phase === 'starting') {
+    return (
+      <div className="flex items-center justify-center h-screen text-[#888] text-lg">
+        Setting up...
+      </div>
+    )
+  }
+
+  if (phase === 'selecting') {
+    return <DumpSelectModal onLoad={handleSelectDump} currentDump={currentDump} />
   }
 
   return (
