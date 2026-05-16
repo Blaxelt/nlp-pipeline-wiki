@@ -19,6 +19,7 @@ export interface TopBarProps {
     handleCompareCleaners: () => void;
     articleId_forCompare: string;
     onSelectTitle: (title: string) => void;
+    currentDump: string | null;
 }
 
 export function TopBar({
@@ -34,7 +35,8 @@ export function TopBar({
     error,
     handleCompareCleaners,
     articleId_forCompare,
-    onSelectTitle
+    onSelectTitle,
+    currentDump
 }: TopBarProps) {
     const [suggestions, setSuggestions] = useState<{title: string; revision_id: string}[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
@@ -194,6 +196,11 @@ export function TopBar({
                     </p>
                 ) : null}
             </div>
+            {currentDump && (
+                <span className="text-[#888] text-sm whitespace-nowrap ml-auto">
+                    {currentDump}
+                </span>
+            )}
         </div>
     )
 }

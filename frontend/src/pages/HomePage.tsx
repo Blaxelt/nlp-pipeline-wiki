@@ -256,6 +256,7 @@ export function HomePage() {
         handleCompareCleaners={handleCompareCleaners}
         articleId_forCompare={articleId}
         onSelectTitle={handleLoadByTitle}
+        currentDump={currentDump}
       />
 
       {!currentDump && (
