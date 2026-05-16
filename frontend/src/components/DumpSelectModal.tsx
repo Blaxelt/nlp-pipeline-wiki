@@ -6,10 +6,11 @@ const BTN_CLASS = "px-3 py-1 bg-[#333] border border-[#555] rounded text-[#e0e0e
 
 export interface DumpSelectModalProps {
     onLoad: (date: string) => void
+    onClose: () => void
     currentDump: string | null
 }
 
-export function DumpSelectModal({ onLoad, currentDump }: DumpSelectModalProps) {
+export function DumpSelectModal({ onLoad, onClose, currentDump }: DumpSelectModalProps) {
     const [dumps, setDumps] = useState<string[]>([])
     const [fetchingDumps, setFetchingDumps] = useState(true)
     const [fetchError, setFetchError] = useState('')
@@ -47,7 +48,7 @@ export function DumpSelectModal({ onLoad, currentDump }: DumpSelectModalProps) {
     }, [selected, loadingDump, onLoad])
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-100">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-100" onClick={onClose}>
             <div className="bg-[rgb(36,34,34)] rounded-xl px-8 py-6 flex flex-col gap-4 min-w-80 max-w-md shadow-[0_8px_32px_rgba(0,0,0,0.2)]" onClick={e => e.stopPropagation()}>
                 <h3 className="m-0 text-lg">Select dump to load</h3>
                 {fetchingDumps ? (
@@ -83,6 +84,7 @@ export function DumpSelectModal({ onLoad, currentDump }: DumpSelectModalProps) {
                     <button onClick={handleLoad} disabled={!selected || fetchingDumps || loadingDump} className={BTN_CLASS}>
                         {loadingDump ? 'Loading...' : 'Load'}
                     </button>
+                    <button onClick={onClose} disabled={loadingDump} className={BTN_CLASS}>Close</button>
                 </div>
             </div>
         </div>

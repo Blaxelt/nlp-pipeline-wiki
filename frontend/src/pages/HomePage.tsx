@@ -85,6 +85,10 @@ export function HomePage() {
     setPhase('ready')
   }
 
+  const handleCloseDumpModal = () => {
+    setPhase('ready')
+  }
+
   const loadArticle = (id: string, text?: string) => {
     setError('')
     setArticleId(id)
@@ -160,6 +164,7 @@ export function HomePage() {
       }
       const data = await response.json()
       console.log('Respuesta:', data)
+      setCurrentDump(date.replace(/-/g, ''))
       setShowPicker(false)
     } catch (err) {
       setModalError('Could not reach the server.')
@@ -232,7 +237,7 @@ export function HomePage() {
   }
 
   if (phase === 'selecting') {
-    return <DumpSelectModal onLoad={handleSelectDump} currentDump={currentDump} />
+    return <DumpSelectModal onLoad={handleSelectDump} onClose={handleCloseDumpModal} currentDump={currentDump} />
   }
 
   return (
@@ -252,6 +257,12 @@ export function HomePage() {
         articleId_forCompare={articleId}
         onSelectTitle={handleLoadByTitle}
       />
+
+      {!currentDump && (
+        <div className="bg-[#2a1a1a] border border-[#5a3a3a] text-[#e0a0a0] px-4 py-2 m-2.5 rounded text-sm">
+          No dump loaded - article search is disabled. Use <strong>Load bz2</strong> to fetch a dump.
+        </div>
+      )}
 
       <LoadDumpModal
         showPicker={showPicker}
