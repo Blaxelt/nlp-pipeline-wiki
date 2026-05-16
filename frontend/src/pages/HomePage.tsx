@@ -38,46 +38,25 @@ export function HomePage() {
 
   useEffect(() => {
     if (phase !== 'starting') return
-    fetch(`${API_URL}/health`)
-      .then(res => {
-        if (!res.ok) throw new Error('not ready')
-        return fetch(`${API_URL}/articles/available-dumps`)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('not ready')
-        return res.json()
-      })
-      .then(data => {
-        if (data.current) {
-          setCurrentDump(data.current)
-          setPhase('ready')
-        } else {
-          setPhase('selecting')
-        }
-      })
-      .catch(() => {
-        const poll = setInterval(() => {
-          fetch(`${API_URL}/health`)
-            .then(res => {
-              if (res.ok) {
-                clearInterval(poll)
-                return fetch(`${API_URL}/articles/available-dumps`)
-              }
-              return null
-            })
-            .then(res => res ? res.json() : null)
-            .then(data => {
-              if (!data) return
-              if (data.current) {
-                setCurrentDump(data.current)
-                setPhase('ready')
-              } else {
-                setPhase('selecting')
-              }
-            })
-            .catch(() => {})
-        }, 1000)
-      })
+    const poll = setInterval(() => {
+      fetch(`${API_URL}/articles/available-dumps`)
+        .then(res => {
+          if (!res.ok) return
+          clearInterval(poll)
+          return res.json()
+        })
+        .then(data => {
+          if (!data) return
+          if (data.current) {
+            setCurrentDump(data.current)
+            setPhase('ready')
+          } else {
+            setPhase('selecting')
+          }
+        })
+        .catch(() => {})
+    }, 1000)
+    return () => clearInterval(poll)
   }, [phase])
 
   const handleSelectDump = (date: string) => {
