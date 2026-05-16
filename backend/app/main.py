@@ -9,14 +9,12 @@ from app.api.routes import articles
 from app.api.routes import wikipedia_urls
 from app.api.routes import neologisms
 from contextlib import asynccontextmanager
-from app.core.wikipedia_index import load_all
-from app.core import article_store
+from app.core.wikipedia_index import load_index
 from app.core import neologism_reviews
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    load_all()
-    article_store.load_latest()
+    load_index("es")
     neologism_reviews.load()
     yield
 

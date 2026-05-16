@@ -80,20 +80,6 @@ def load(date: str) -> None:
     logger.info("Article index loaded: %d entries, %d titles", len(_ids), len(_title_to_id))
 
 
-def load_latest() -> None:
-    """Load the index for the most recent dump found in data/. Used when starting the server."""
-    # Prefer -clean index files, fall back to original
-    files = sorted(DATA_DIR.glob("eswiki-*-index-clean.json"))
-    if not files:
-        files = sorted(DATA_DIR.glob("eswiki-*-index.json"))
-    if not files:
-        logger.warning("No index file found in %s — article store is empty", DATA_DIR)
-        return
-    # Extract date: eswiki-20260301-index-clean.json -> 20260301
-    date = files[-1].name.split("-")[1]
-    load(date)
-
-
 def get(revision_id: str) -> dict | None:
     """Return the article record for the given revision_id, or None if not found."""
     if _data_path is None:
