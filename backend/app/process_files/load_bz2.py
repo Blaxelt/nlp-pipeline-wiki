@@ -2,6 +2,7 @@ import bz2
 import json
 import logging
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -11,6 +12,17 @@ from pathlib import Path
 import wikitextparser as wtp
 
 logger = logging.getLogger(__name__)
+
+_cancel_event = threading.Event()
+
+
+class LoadCancelledError(Exception):
+    pass
+
+
+def cancel() -> None:
+    """Signal the currently running load job to stop."""
+    _cancel_event.set()
 
 DUMP_URL_TEMPLATE = (
     "https://dumps.wikimedia.org/eswiki/{date}/"
@@ -121,11 +133,25 @@ def _download_bz2(date: str) -> Path:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     url = DUMP_URL_TEMPLATE.format(date=date)
     logger.info("Downloading %s", url)
+    tmp_path = bz2_path.with_suffix(".bz2.tmp")
     try:
-        urllib.request.urlretrieve(url, bz2_path)
+        req = urllib.request.Request(url, headers={"User-Agent": "esdbpedia/1.0"})
+        with urllib.request.urlopen(req) as resp, open(tmp_path, "wb") as f:
+            while True:
+                if _cancel_event.is_set():
+                    raise LoadCancelledError()
+                chunk = resp.read(1024 * 1024)  # 1 MB chunks
+                if not chunk:
+                    break
+                f.write(chunk)
+        tmp_path.rename(bz2_path)
     except urllib.error.HTTPError as exc:
+        tmp_path.unlink(missing_ok=True)
         if exc.code == 404:
             raise ValueError(f"No dump found for date '{date}'. Check https://dumps.wikimedia.org/eswiki/ for available dates.") from exc
+        raise
+    except LoadCancelledError:
+        tmp_path.unlink(missing_ok=True)
         raise
     logger.info("Download complete: %s", bz2_path)
     return bz2_path
@@ -172,6 +198,8 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
                         total += 1
                         if total % 500 == 0:
                             logger.info("Written %d pages...", total)
+                            if _cancel_event.is_set():
+                                raise LoadCancelledError()
                 elem.clear()
                 root.clear()
 
@@ -194,6 +222,7 @@ def run(date: str) -> dict:
 
     Raises:
         ValueError: If the date format is invalid.
+        LoadCancelledError: If cancel() was called during processing.
     """
     if not re.fullmatch(r"\d{8}", date):
         raise ValueError(f"Invalid date '{date}': must be 8 digits, e.g. 20260301")
@@ -214,10 +243,17 @@ def run(date: str) -> dict:
             "elapsed_seconds": 0.0,
         }
 
+    _cancel_event.clear()
     start = time.time()
-    bz2_path = _download_bz2(date)
-    with bz2.open(bz2_path, "rb") as stream: # stream is now a file-like object of decompressed XML bytes
-        total, skipped = _process(stream, data_path, index_path)
+    try:
+        bz2_path = _download_bz2(date)
+        with bz2.open(bz2_path, "rb") as stream:
+            total, skipped = _process(stream, data_path, index_path)
+    except LoadCancelledError:
+        logger.info("Load cancelled — cleaning up partial files")
+        data_path.unlink(missing_ok=True)
+        index_path.unlink(missing_ok=True)
+        raise
     elapsed = round(time.time() - start, 2)
 
     logger.info("Done. %d pages written, %d skipped in %ss", total, skipped, elapsed)

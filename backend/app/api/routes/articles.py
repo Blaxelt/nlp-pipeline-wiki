@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Path, Query
 
 from app.core import article_store
 from app.process_files.extract_entities import extract_entities
-from app.process_files.load_bz2 import run as load_dump
+from app.process_files.load_bz2 import LoadCancelledError, cancel as cancel_dump, run as load_dump
 
 router = APIRouter()
 
@@ -47,8 +47,16 @@ def load_articles(date: str = Query(..., pattern=r"^\d{8}$", description="Dump d
         result = load_dump(date)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
+    except LoadCancelledError:
+        raise HTTPException(status_code=409, detail="Load cancelled")
     article_store.load(date)  # Reload index into memory after new dump
     return result
+
+
+@router.post("/articles/load/cancel")
+def cancel_load():
+    cancel_dump()
+    return {"status": "cancellation requested"}
 
 
 @router.get("/articles/suggest")

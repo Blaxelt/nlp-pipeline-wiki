@@ -39,9 +39,12 @@ export function LoadDumpModal({ showPicker, setShowPicker, onSuccess }: LoadDump
         setLoadError('')
         fetch(`${API_URL}/articles/load?date=${selected}`, { method: 'POST' })
             .then(res => {
+                if (res.status === 409) return false  
                 if (!res.ok) return res.json().then(d => { throw new Error(d.detail || 'Failed to load') })
+                return true
             })
-            .then(() => {
+            .then(ok => {
+                if (!ok) return  
                 setShowPicker(false)
                 onSuccess(selected)
             })
@@ -49,12 +52,21 @@ export function LoadDumpModal({ showPicker, setShowPicker, onSuccess }: LoadDump
             .finally(() => setLoading(false))
     }, [selected, loading, setShowPicker, onSuccess])
 
+    const handleCancel = useCallback(() => {
+        if (loading) {
+            fetch(`${API_URL}/articles/load/cancel`, { method: 'POST' })
+            setShowPicker(false)
+        } else {
+            setShowPicker(false)
+        }
+    }, [loading, setShowPicker])
+
     if (!showPicker) return null
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-100" onClick={() => setShowPicker(false)}>
             <div className="bg-[rgb(36,34,34)] rounded-xl px-8 py-6 flex flex-col gap-4 min-w-80 max-w-md shadow-[0_8px_32px_rgba(0,0,0,0.2)]" onClick={(e) => e.stopPropagation()}>
-                <h3 className="m-0">Select dump to download and process</h3>
+                <h3 className="m-0">Select dump to download and clean</h3>
                 {fetching ? (
                     <p className="text-[#888] m-0">Loading available dumps...</p>
                 ) : fetchError ? (
@@ -83,10 +95,12 @@ export function LoadDumpModal({ showPicker, setShowPicker, onSuccess }: LoadDump
                 )}
                 <div className="flex gap-2 justify-end">
                     <button onClick={handleLoad} disabled={!selected || fetching || loading} className={BTN_CLASS}>
-                        {loading ? 'Downloading & Processing...' : 'Download & Process'}
+                        {loading ? 'Downloading & cleaning...' : 'Download & clean'}
                     </button>
-                    <button onClick={() => setShowPicker(false)} disabled={loading} className={BTN_CLASS}>Cancel</button>
-                </div>
+                    <button onClick={handleCancel} className={BTN_CLASS}>
+                        {loading ? 'Cancel' : 'Cancel'}
+                    </button>
+                </div>  
             </div>
         </div>
     )
