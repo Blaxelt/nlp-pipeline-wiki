@@ -1,4 +1,5 @@
 import json
+import re
 import urllib.request
 from pathlib import Path as FilePath
 
@@ -17,6 +18,18 @@ _DATA_DIR = FilePath(__file__).parent.parent.parent.parent.parent / "data"
 @router.get("/articles/available-dumps")
 def list_dumps():
     return {"available": article_store.list_available(), "current": article_store.get_current_date()}
+
+
+@router.get("/articles/remote-dumps")
+def remote_dumps():
+    try:
+        req = urllib.request.Request("https://dumps.wikimedia.org/eswiki/", headers={"User-Agent": "esdbpedia/1.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            html = resp.read().decode("utf-8")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Wikimedia dumps page unreachable: {exc}")
+    dates = sorted(set(re.findall(r'href="(\d{8})/"', html)), reverse=True)
+    return {"dates": dates}
 
 
 @router.post("/articles/load-existing")

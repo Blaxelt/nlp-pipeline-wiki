@@ -24,10 +24,7 @@ export function HomePage() {
   const [inputValue, setInputValue] = useState('')
   const [articleText, setArticleText] = useState('')
   const [showPicker, setShowPicker] = useState(false)
-  const [date, setDate] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [modalError, setModalError] = useState('')
   const [iframeSrc, setIframeSrc] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [extractMsg, setExtractMsg] = useState('')
@@ -128,29 +125,8 @@ export function HomePage() {
       .catch(error => setError(error.message))
   }
 
-  const handleSubmit = async () => {
-    if (!date) return
-    setLoading(true)
-    setModalError('')
-    try {
-      const response = await fetch(`${API_URL}/articles/load?date=${date.replace(/-/g, '')}`, {
-        method: 'POST',
-      })
-      if (!response.ok) {
-        const data = await response.json()
-        setModalError(data.detail || 'Unknown error')
-        return
-      }
-      const data = await response.json()
-      console.log('Respuesta:', data)
-      setCurrentDump(date.replace(/-/g, ''))
-      setShowPicker(false)
-    } catch (err) {
-      setModalError('Could not reach the server.')
-      console.error('Error:', err)
-    } finally {
-      setLoading(false)
-    }
+  const handleDumpLoaded = (date: string) => {
+    setCurrentDump(date)
   }
 
   const handleTextSelection = () => {
@@ -247,11 +223,7 @@ export function HomePage() {
       <LoadDumpModal
         showPicker={showPicker}
         setShowPicker={setShowPicker}
-        date={date}
-        setDate={setDate}
-        handleSubmit={handleSubmit}
-        loading={loading}
-        modalError={modalError}
+        onSuccess={handleDumpLoaded}
       />
 
       {showDiff ? (
