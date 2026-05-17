@@ -201,7 +201,19 @@ def run(date: str) -> dict:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-clean.json"
     index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
- 
+
+    if data_path.exists() and index_path.exists():
+        logger.info("Clean output already exists: %s, %s", data_path, index_path)
+        with open(index_path, encoding="utf-8") as f:
+            idx = json.load(f)
+        return {
+            "data_path": str(data_path),
+            "index_path": str(index_path),
+            "total_pages": len(idx.get("ids", [])),
+            "skipped": 0,
+            "elapsed_seconds": 0.0,
+        }
+
     start = time.time()
     bz2_path = _download_bz2(date)
     with bz2.open(bz2_path, "rb") as stream: # stream is now a file-like object of decompressed XML bytes

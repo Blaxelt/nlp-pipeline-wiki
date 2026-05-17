@@ -54,7 +54,7 @@ export function LoadDumpModal({ showPicker, setShowPicker, onSuccess }: LoadDump
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-100" onClick={() => setShowPicker(false)}>
             <div className="bg-[rgb(36,34,34)] rounded-xl px-8 py-6 flex flex-col gap-4 min-w-80 max-w-md shadow-[0_8px_32px_rgba(0,0,0,0.2)]" onClick={(e) => e.stopPropagation()}>
-                <h3 className="m-0">Select dump to download</h3>
+                <h3 className="m-0">Select dump to download and process</h3>
                 {fetching ? (
                     <p className="text-[#888] m-0">Loading available dumps...</p>
                 ) : fetchError ? (
@@ -83,7 +83,7 @@ export function LoadDumpModal({ showPicker, setShowPicker, onSuccess }: LoadDump
                 )}
                 <div className="flex gap-2 justify-end">
                     <button onClick={handleLoad} disabled={!selected || fetching || loading} className={BTN_CLASS}>
-                        {loading ? 'Loading...' : 'Download'}
+                        {loading ? 'Downloading & Processing...' : 'Download & Process'}
                     </button>
                     <button onClick={() => setShowPicker(false)} disabled={loading} className={BTN_CLASS}>Cancel</button>
                 </div>
