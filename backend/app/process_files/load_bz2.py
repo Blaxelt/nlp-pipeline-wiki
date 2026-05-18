@@ -170,36 +170,40 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
     with open(data_path, "w", encoding="utf-8") as f:
         for event, elem in context:
             if event == "end" and elem.tag == f"{ns}page":
-                title_el = elem.find(f"{ns}title")
-                revision = elem.find(f"{ns}revision")
-                if revision is None:
+                ns_el = elem.find(f"{ns}ns")
+                if ns_el is None or int(ns_el.text) != 0:
                     skipped += 1
                 else:
-                    rev_id_el = revision.find(f"{ns}id")
-                    text = _get_plain_text(revision, ns)
-                    if text is None:
+                    title_el = elem.find(f"{ns}title")
+                    revision = elem.find(f"{ns}revision")
+                    if revision is None:
                         skipped += 1
                     else:
-                        rev_id = rev_id_el.text if rev_id_el is not None else None
-                        title = title_el.text if title_el is not None else None
-                        record = json.dumps({
-                            "revision_id": rev_id,
-                            "title": title,
-                            "text": text,
-                        }, ensure_ascii=False)
-                        offset = f.tell()
-                        f.write(record + "\n")
-                        if rev_id is not None:
-                            ids.append(rev_id)
-                            offsets.append(offset)
-                            if title is not None:
-                                title_to_id[title] = rev_id
+                        rev_id_el = revision.find(f"{ns}id")
+                        text = _get_plain_text(revision, ns)
+                        if text is None:
+                            skipped += 1
+                        else:
+                            rev_id = rev_id_el.text if rev_id_el is not None else None
+                            title = title_el.text if title_el is not None else None
+                            record = json.dumps({
+                                "revision_id": rev_id,
+                                "title": title,
+                                "text": text,
+                            }, ensure_ascii=False)
+                            offset = f.tell()
+                            f.write(record + "\n")
+                            if rev_id is not None:
+                                ids.append(rev_id)
+                                offsets.append(offset)
+                                if title is not None:
+                                    title_to_id[title] = rev_id
 
-                        total += 1
-                        if total % 500 == 0:
-                            logger.info("Written %d pages...", total)
-                            if _cancel_event.is_set():
-                                raise LoadCancelledError()
+                            total += 1
+                            if total % 500 == 0:
+                                logger.info("Written %d pages...", total)
+                                if _cancel_event.is_set():
+                                    raise LoadCancelledError()
                 elem.clear()
                 root.clear()
 
@@ -213,6 +217,7 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
 
 def run(date: str) -> dict:
     """Download, decompress and process an eswiki dump for the given date.
+    Only pages in namespace 0 (articles) are kept.
 
     Args:
         date: Dump date in YYYYMMDD format, e.g. '20260301'.
@@ -228,8 +233,8 @@ def run(date: str) -> dict:
         raise ValueError(f"Invalid date '{date}': must be 8 digits, e.g. 20260301")
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-clean.json"
-    index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
+    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-ns0-clean.json"
+    index_path = DATA_DIR / f"eswiki-{date}-index-ns0-clean.json"
 
     if data_path.exists() and index_path.exists():
         logger.info("Clean output already exists: %s, %s", data_path, index_path)

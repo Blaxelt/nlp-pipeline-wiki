@@ -17,12 +17,12 @@ def main():
 
     parser.add_argument(
         "--input",
-        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-clean.json"),
-        help="Input NDJSON file (default: eswiki-20260301-pages-articles-clean.json)",
+        default=str(base_dir / "data" / "eswiki-20251020-pages-articles-ns0-clean.json"),
+        help="Input NDJSON file (default: eswiki-20251020-pages-articles-ns0-clean.json)",
     )
     parser.add_argument(
         "--output",
-        default=str(base_dir / "data" / "eswiki-20260301-pages-articles-no-redirects-clean.json"),
+        default=str(base_dir / "data" / "eswiki-20251020-pages-articles-ns0-no-redirects-clean.json"),
         help="Output NDJSON file",
     )
     args = parser.parse_args()
