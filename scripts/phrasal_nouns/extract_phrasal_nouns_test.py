@@ -54,8 +54,7 @@ print(f"[TIME] Load article:    {fmt_time(time.perf_counter() - t0)}")
 t0 = time.perf_counter()
 MODEL_NAME = args.model
 nlp = spacy.load(MODEL_NAME)
-if MODEL_NAME != "es_dep_news_trf":
-    nlp.select_pipes(disable=["ner"])
+nlp.select_pipes(disable=["ner", "lemmatizer", "attribute_ruler"])
 print(f"[TIME] Load model:      {fmt_time(time.perf_counter() - t0)}  ({MODEL_NAME})")
 
 t0 = time.perf_counter()
