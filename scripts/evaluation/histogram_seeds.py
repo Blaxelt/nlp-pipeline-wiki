@@ -78,7 +78,7 @@ def main():
     parser.add_argument(
         "--input",
         default=str(base_dir / "data" / "eswiki-20260301-pages-articles-ns0-no-redirects-clean.json"),
-        help="Path to input NDJSON file (default: eswiki-20260301-pages-articles-ns0-no-redirects-clean.json)",
+        help="Path to input NDJSON file",
     )
     args = parser.parse_args()
 
@@ -137,7 +137,7 @@ def main():
     ax.set_xlim(0, 100)
     ax.grid(axis="y", linestyle="--", alpha=0.4)
 
-    out_path = Path(__file__).resolve().parent / f"histogram_seeds{N_SEEDS}_art{N_ARTICLES}_clean_ns0.png"
+    out_path = Path(__file__).resolve().parent / f"histogram_seeds{N_SEEDS}_art{N_ARTICLES}_ns0_no_redirects_clean.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     print(f"\nFigura guardada en: {out_path}")
     plt.show()
