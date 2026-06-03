@@ -137,6 +137,11 @@ def _download_bz2(date: str) -> Path:
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "esdbpedia/1.0"})
         with urllib.request.urlopen(req) as resp, open(tmp_path, "wb") as f:
+            total_size = int(resp.headers.get("Content-Length", 0))
+            total_mb = total_size / (1024 * 1024) if total_size else None
+            downloaded = 0
+            last_logged_mb = 0
+            LOG_INTERVAL_MB = 100
             while True:
                 if _cancel_event.is_set():
                     raise LoadCancelledError()
@@ -144,6 +149,15 @@ def _download_bz2(date: str) -> Path:
                 if not chunk:
                     break
                 f.write(chunk)
+                downloaded += len(chunk)
+                downloaded_mb = downloaded / (1024 * 1024)
+                if downloaded_mb - last_logged_mb >= LOG_INTERVAL_MB:
+                    if total_mb:
+                        logger.info("Downloading: %.0f / %.0f MB (%.0f%%)",
+                                    downloaded_mb, total_mb, 100 * downloaded_mb / total_mb)
+                    else:
+                        logger.info("Downloading: %.0f MB", downloaded_mb)
+                    last_logged_mb = downloaded_mb
         tmp_path.rename(bz2_path)
     except urllib.error.HTTPError as exc:
         tmp_path.unlink(missing_ok=True)
@@ -218,16 +232,6 @@ def _process(stream, data_path: Path, index_path: Path) -> tuple[int, int]:
 def run(date: str) -> dict:
     """Download, decompress and process an eswiki dump for the given date.
     Only pages in namespace 0 (articles) are kept.
-
-    Args:
-        date: Dump date in YYYYMMDD format, e.g. '20260301'.
-
-    Returns:
-        Dict with keys: data_path, index_path, total_pages, skipped, elapsed_seconds.
-
-    Raises:
-        ValueError: If the date format is invalid.
-        LoadCancelledError: If cancel() was called during processing.
     """
     if not re.fullmatch(r"\d{8}", date):
         raise ValueError(f"Invalid date '{date}': must be 8 digits, e.g. 20260301")
