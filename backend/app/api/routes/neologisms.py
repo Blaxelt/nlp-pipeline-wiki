@@ -8,15 +8,12 @@ from app.core import neologism_reviews
 router = APIRouter()
 
 _DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
-_NEOLOGISMS_FILE = _DATA_DIR / "frequency" / "eswiki_neologisms_occurrences_enriched_clean.json"
+_NEOLOGISMS_FILE = _DATA_DIR / "token_frequencies" / "eswiki_neologisms_occurrences_clean_spacy_enriched.json"
+_PHRASAL_NEOLOGISMS_FILE = _DATA_DIR / "frequency" / "phrasal_nouns" / "eswiki_neologisms_phrasal_nouns_occurrences_enriched.json"
 
-@lru_cache(maxsize=1)
-def load_neologisms():
-    if not _NEOLOGISMS_FILE.exists():
-        return []
-    with open(_NEOLOGISMS_FILE, "r", encoding="utf-8") as f:
-        raw = json.load(f)
-    # Pre-compute word-level mean_depth and num_categories
+
+def _precompute_depths(raw: list[dict]) -> list[dict]:
+    """Pre-compute word-level mean_depth and num_categories."""
     for item in raw:
         depths = []
         distinct_cats: set[str] = set()
@@ -31,8 +28,28 @@ def load_neologisms():
         item["num_categories"] = len(distinct_cats)
     return raw
 
+
+@lru_cache(maxsize=1)
+def load_neologisms():
+    if not _NEOLOGISMS_FILE.exists():
+        return []
+    with open(_NEOLOGISMS_FILE, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    return _precompute_depths(raw)
+
+
+@lru_cache(maxsize=1)
+def load_phrasal_neologisms():
+    if not _PHRASAL_NEOLOGISMS_FILE.exists():
+        return []
+    with open(_PHRASAL_NEOLOGISMS_FILE, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+    return _precompute_depths(raw)
+
+
 @router.get("/neologisms")
 def get_neologisms(
+    type: str = Query("words", description="Type of neologisms: 'words' or 'phrasal'"),
     min_pages: Optional[int] = Query(None, description="Minimum number of pages"),
     max_pages: Optional[int] = Query(None, description="Maximum number of pages"),
     min_freq: Optional[int] = Query(None, description="Minimum total frequency"),
@@ -44,7 +61,10 @@ def get_neologisms(
     offset: int = Query(0, description="Offset for pagination"),
 ):
     try:
-        data = load_neologisms()
+        if type == "phrasal":
+            data = load_phrasal_neologisms()
+        else:
+            data = load_neologisms()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     

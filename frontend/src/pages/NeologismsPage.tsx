@@ -53,13 +53,14 @@ export function NeologismsPage() {
     const detailLimit = 50
 
     const offset = Number(searchParams.get('offset') || 0)
+    const neoType = searchParams.get('type') || 'words'
 
     const fetchNeologisms = useCallback(async (currentOffset: number = 0) => {
         setLoading(true)
         setError('')
         try {
             const params = new URLSearchParams()
-            const filterKeys = ['min_pages', 'max_pages', 'min_freq', 'max_freq', 'min_depth', 'max_depth', 'review_status']
+            const filterKeys = ['type', 'min_pages', 'max_pages', 'min_freq', 'max_freq', 'min_depth', 'max_depth', 'review_status']
             for (const key of filterKeys) {
                 const value = searchParams.get(key)
                 if (value) params.append(key, value)
@@ -167,12 +168,42 @@ export function NeologismsPage() {
         }
     }
 
+    const switchType = (t: string) => {
+        const next = new URLSearchParams(searchParams)
+        next.set('type', t)
+        next.delete('offset')
+        setSearchParams(next)
+    }
+
     return (
         <div className="p-6 text-[#e0e0e0]">
             <div className="flex items-center gap-4 mb-4">
                 <Link to="/" className="px-2.5 py-0.75 bg-[#333] text-[#e0e0e0] border border-[#555] rounded text-[0.9rem] no-underline cursor-pointer hover:bg-[#444]">&larr; Back to Review</Link>
                 <h2 className="m-0">Neologisms</h2>
                 <span className="text-[#888] text-[0.9rem]">({total} results)</span>
+            </div>
+
+            <div className="flex gap-0 mb-4">
+                <button
+                    onClick={() => switchType('words')}
+                    className={`px-4 py-2 border border-[#555] rounded-l cursor-pointer text-[0.9rem] ${
+                        neoType === 'words'
+                            ? 'bg-[#4dabf7] text-[#1a1a1a] border-[#4dabf7] font-semibold'
+                            : 'bg-[#2a2a2a] text-[#e0e0e0] hover:bg-[#333]'
+                    }`}
+                >
+                    Single Words
+                </button>
+                <button
+                    onClick={() => switchType('phrasal')}
+                    className={`px-4 py-2 border border-[#555] border-l-0 rounded-r cursor-pointer text-[0.9rem] ${
+                        neoType === 'phrasal'
+                            ? 'bg-[#4dabf7] text-[#1a1a1a] border-[#4dabf7] font-semibold'
+                            : 'bg-[#2a2a2a] text-[#e0e0e0] hover:bg-[#333]'
+                    }`}
+                >
+                    Phrasal Nouns
+                </button>
             </div>
 
             <div className="flex gap-3 my-6 flex-wrap items-end">

@@ -1,11 +1,11 @@
 from pathlib import Path
 
 script_dir = Path(__file__).resolve().parent
-freq_dir   = (script_dir / '../../data/frequency').resolve()
+freq_dir   = (script_dir / '../../data/token_frequencies').resolve() 
 
-old_path = freq_dir / 'eswiki_20251020_word_frequencies_ns0_clean.txt'
-new_path = freq_dir / 'eswiki_20260301_word_frequencies_ns0_clean.txt'
-out_path = freq_dir / 'eswiki_neologisms_20260301_20251020_ns0_clean.txt'
+old_path = freq_dir / 'eswiki_20251020_token_frequencies.txt'
+new_path = freq_dir / 'eswiki_20260301_token_frequencies.txt'
+out_path = freq_dir / 'eswiki_neologisms_20260301_20251020.txt'
 
 def load_tokens(path):
     tokens = {}
