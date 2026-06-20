@@ -36,7 +36,7 @@ def to_arrays(frequencies):
 def plot_zipf():
     script_dir   = Path(__file__).resolve().parent
     corpes_path  = (script_dir / '../../data/frequency/frecuencia_formas_ortograficas_1_4.txt').resolve()
-    eswiki_path  = (script_dir / '../../data/frequency/eswiki_20260301_word_frequencies_clean.txt').resolve()
+    eswiki_path  = (script_dir / '../../data/token_frequencies_filtered/eswiki_20260301_token_frequencies.txt').resolve()
     output_path  = script_dir / 'zipf_plot.png'
 
     if not corpes_path.exists():
