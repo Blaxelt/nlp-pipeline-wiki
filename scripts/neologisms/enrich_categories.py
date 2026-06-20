@@ -1,3 +1,4 @@
+import argparse
 import json
 import sys
 import time
@@ -9,6 +10,21 @@ CAT_DIR = DATA_DIR / "categories"
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Enrich neologisms occurrences with category data.")
+    parser.add_argument(
+        "--input",
+        type=str,
+        default=str(DATA_DIR / "token_frequencies" / "eswiki_neologisms_occurrences_clean_spacy.json"),
+        help="Path to the input neologisms JSON file."
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=str(DATA_DIR / "token_frequencies" / "eswiki_neologisms_occurrences_clean_spacy_enriched.json"),
+        help="Path to save the enriched output JSON file."
+    )
+    args = parser.parse_args()
+
     t0 = time.time()
 
     # Load category data
@@ -22,9 +38,9 @@ def main():
 
     print(f"  Loaded {len(cat_depth):,} category depths, {len(article_cats):,} article→cat mappings")
 
-    # Load neologisms
-    print("Loading neologisms …")
-    with open(FREQ_DIR / "eswiki_neologisms_occurrences_clean.json", encoding="utf-8") as f:
+    in_path = Path(args.input)
+    print(f"Loading neologisms from {in_path.name} …")
+    with open(in_path, encoding="utf-8") as f:
         neologisms: list[dict] = json.load(f)
     print(f"  {len(neologisms):,} neologism entries")
 
@@ -62,7 +78,8 @@ def main():
     print(f"  Pages matched: {matched:,}, unmatched: {unmatched:,}")
 
     # Save
-    out_path = FREQ_DIR / "eswiki_neologisms_occurrences_enriched_clean.json"
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     print(f"Saving to {out_path.name} …")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(neologisms, f, ensure_ascii=False, indent=2)
