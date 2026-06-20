@@ -1,8 +1,8 @@
 /my_virtdb
 .venv
 __pycache__/
-scripts/extractor/eswiki*
-scripts/extractor/text
+scripts/extraction/eswiki*
+scripts/extraction/text
 *.env
 index
 data

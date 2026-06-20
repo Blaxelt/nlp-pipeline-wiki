@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 INPUT_FILE = ROOT_DIR / "data" / "eswiki-20260301-pages-articles-ns0-clean.json"
 OUTPUT_FILE = ROOT_DIR / "data" / "redirects_map.json"
 
