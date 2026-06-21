@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from app.core import neologism_reviews
@@ -8,8 +7,12 @@ from app.core import neologism_reviews
 router = APIRouter()
 
 _DATA_DIR = Path(__file__).parent.parent.parent.parent.parent / "data"
-_NEOLOGISMS_FILE = _DATA_DIR / "token_frequencies" / "eswiki_neologisms_occurrences_clean_spacy_enriched.json"
-_PHRASAL_NEOLOGISMS_FILE = _DATA_DIR / "frequency" / "phrasal_nouns" / "eswiki_neologisms_phrasal_nouns_occurrences_enriched.json"
+
+# Module-level state for loaded data
+_words_data: list[dict] | None = None
+_words_file: str | None = None
+_phrasal_data: list[dict] | None = None
+_phrasal_file: str | None = None
 
 
 def _precompute_depths(raw: list[dict]) -> list[dict]:
@@ -29,22 +32,98 @@ def _precompute_depths(raw: list[dict]) -> list[dict]:
     return raw
 
 
-@lru_cache(maxsize=1)
-def load_neologisms():
-    if not _NEOLOGISMS_FILE.exists():
+def _load_file(rel_path: str) -> list[dict]:
+    """Load and precompute a neologism JSON file given a path relative to data/."""
+    full_path = (_DATA_DIR / rel_path).resolve()
+    # Security: ensure path stays within data dir
+    if not str(full_path).startswith(str(_DATA_DIR.resolve())):
+        raise ValueError("Invalid path")
+    if not full_path.exists():
         return []
-    with open(_NEOLOGISMS_FILE, "r", encoding="utf-8") as f:
+    with open(full_path, "r", encoding="utf-8") as f:
         raw = json.load(f)
     return _precompute_depths(raw)
 
 
-@lru_cache(maxsize=1)
-def load_phrasal_neologisms():
-    if not _PHRASAL_NEOLOGISMS_FILE.exists():
+def _get_words_data() -> list[dict]:
+    if _words_data is None:
         return []
-    with open(_PHRASAL_NEOLOGISMS_FILE, "r", encoding="utf-8") as f:
-        raw = json.load(f)
-    return _precompute_depths(raw)
+    return _words_data
+
+
+def _get_phrasal_data() -> list[dict]:
+    if _phrasal_data is None:
+        return []
+    return _phrasal_data
+
+
+def _discover_files() -> dict[str, list[dict]]:
+    """Discover neologism JSON files in data/ directory."""
+    words_files = []
+    phrasal_files = []
+
+    for json_file in sorted(_DATA_DIR.rglob("*.json")):
+        name = json_file.name.lower()
+        # Only include enriched neologism/phrasal files
+        if "enriched" not in name:
+            continue
+        if "neologism" not in name and "phrasal" not in name:
+            continue
+
+        rel_path = str(json_file.relative_to(_DATA_DIR))
+        entry = {"path": rel_path, "name": json_file.name}
+
+        if "phrasal" in name:
+            phrasal_files.append(entry)
+        else:
+            words_files.append(entry)
+
+    return {"words": words_files, "phrasal": phrasal_files}
+
+
+@router.get("/neologisms/available-files")
+def list_available_files():
+    files = _discover_files()
+    return {
+        **files,
+        "current": {
+            "words": _words_file,
+            "phrasal": _phrasal_file,
+        }
+    }
+
+
+@router.post("/neologisms/load")
+def load_neologism_file(payload: dict):
+    """Load a specific neologism file.
+
+    Body: {"type": "words"|"phrasal", "path": "relative/path.json"}
+    """
+    global _words_data, _words_file, _phrasal_data, _phrasal_file
+
+    neo_type = payload.get("type")
+    rel_path = payload.get("path")
+
+    if neo_type not in ("words", "phrasal"):
+        raise HTTPException(status_code=400, detail="type must be 'words' or 'phrasal'")
+    if not rel_path:
+        raise HTTPException(status_code=400, detail="Missing 'path' field")
+
+    try:
+        data = _load_file(rel_path)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid path")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if neo_type == "words":
+        _words_data = data
+        _words_file = rel_path
+    else:
+        _phrasal_data = data
+        _phrasal_file = rel_path
+
+    return {"status": "loaded", "type": neo_type, "path": rel_path, "count": len(data)}
 
 
 @router.get("/neologisms")
@@ -62,9 +141,9 @@ def get_neologisms(
 ):
     try:
         if type == "phrasal":
-            data = load_phrasal_neologisms()
+            data = _get_phrasal_data()
         else:
-            data = load_neologisms()
+            data = _get_words_data()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -86,9 +165,8 @@ def get_neologisms(
             if word_depth is None or word_depth > max_depth:
                 continue
         
-        # Attach review info
+        # Attach review info via a shallow copy to avoid mutating cached data
         review = neologism_reviews.get(item["word"])
-        item["review"] = review
         
         # Filter by review status
         if review_status:
@@ -99,7 +177,7 @@ def get_neologisms(
                 if review is None or review.get("status") != review_status:
                     continue
         
-        filtered_data.append(item)
+        filtered_data.append({**item, "review": review})
     
     return {
         "total": len(filtered_data),

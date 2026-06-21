@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
+import { NeologismFileModal } from '../components/NeologismFileModal'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -49,6 +50,8 @@ export function NeologismsPage() {
     const [detailOffset, setDetailOffset] = useState(0)
     const [reviewReason, setReviewReason] = useState('')
     const [savingReview, setSavingReview] = useState(false)
+    const [showFilePicker, setShowFilePicker] = useState(false)
+    const [fetchKey, setFetchKey] = useState(0)
     const limit = 100
     const detailLimit = 50
 
@@ -82,7 +85,7 @@ export function NeologismsPage() {
 
     useEffect(() => {
         fetchNeologisms(offset)
-    }, [fetchNeologisms, offset])
+    }, [fetchNeologisms, offset, fetchKey])
 
     const updateFilter = (key: string, value: string) => {
         const next = new URLSearchParams(searchParams)
@@ -181,6 +184,13 @@ export function NeologismsPage() {
                 <Link to="/" className="px-2.5 py-0.75 bg-[#333] text-[#e0e0e0] border border-[#555] rounded text-[0.9rem] no-underline cursor-pointer hover:bg-[#444]">&larr; Back to Review</Link>
                 <h2 className="m-0">Neologisms</h2>
                 <span className="text-[#888] text-[0.9rem]">({total} results)</span>
+                <button
+                    onClick={() => setShowFilePicker(true)}
+                    className="px-2.5 py-0.75 bg-[#333] text-[#e0e0e0] border border-[#555] rounded text-[0.9rem] cursor-pointer hover:bg-[#444]"
+                    title="Select neologism data files"
+                >
+                    Load neologism candidates
+                </button>
             </div>
 
             <div className="flex gap-0 mb-4">
@@ -364,6 +374,12 @@ export function NeologismsPage() {
                         ) : null}
                     </div>
                 </div>
+            ) : null}
+            {showFilePicker ? (
+                <NeologismFileModal
+                    onLoad={() => setFetchKey(k => k + 1)}
+                    onClose={() => setShowFilePicker(false)}
+                />
             ) : null}
         </div>
     )

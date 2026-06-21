@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -31,10 +32,12 @@ def load() -> None:
 
 
 def _save() -> None:
-    """Persist in-memory reviews to disk."""
+    """Persist in-memory reviews to disk atomically."""
     try:
-        with open(REVIEWS_FILE, "w", encoding="utf-8") as f:
+        tmp = REVIEWS_FILE.with_suffix(".tmp")
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(_reviews, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, REVIEWS_FILE)
     except Exception as e:
         logger.error("Failed to save reviews to %s: %s", REVIEWS_FILE, e)
         raise
