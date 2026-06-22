@@ -2,10 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Bake the neologisms frequency JSON into a non-mounted path so it can be
-# copied into the host-mounted /data volume at runtime.
-RUN mkdir -p /app/baked-data/frequency
-COPY data/frequency/eswiki_neologisms_occurrences_enriched_clean.json /app/baked-data/frequency/
+# Bake neologism JSONs into a single clean directory so they survive
+# host-mounted /data volume overwrites at runtime.
+RUN mkdir -p /app/data/neologisms
+COPY data/token_frequencies/eswiki_neologisms_occurrences_clean_spacy_enriched.json /app/data/neologisms/
+COPY data/frequency/phrasal_nouns/eswiki_neologisms_phrasal_nouns_occurrences_enriched.json /app/data/neologisms/
 
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
