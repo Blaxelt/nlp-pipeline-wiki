@@ -9,7 +9,7 @@ import spacy
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-NEO_PATH = DATA_DIR / "token_frequencies" / "eswiki_neologisms_20260301_20251020.txt"
+
 OUTPUT_DIR = DATA_DIR / "token_frequencies"
 
 parser = argparse.ArgumentParser(
@@ -20,6 +20,12 @@ parser.add_argument(
     "--date",
     default="20260301",
     help="Dump date (default: 20260301)",
+)
+
+parser.add_argument(
+    "--old-date",
+    default="20251020",
+    help="Old dump date (default: 20251020)",
 )
 
 parser.add_argument(
@@ -61,6 +67,8 @@ def fmt_time(seconds: float) -> str:
 def main():
     t_total = time.perf_counter()
 
+    neo_path = DATA_DIR / "token_frequencies" / f"eswiki_neologisms_{args.date}_{args.old_date}.txt"
+
     data_path = (
         DATA_DIR
         / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
@@ -70,17 +78,17 @@ def main():
         print(f"Error: Dump not found at {data_path}")
         raise SystemExit(1)
 
-    if not NEO_PATH.exists():
-        print(f"Error: Neologisms file not found at {NEO_PATH}")
+    if not neo_path.exists():
+        print(f"Error: Neologisms file not found at {neo_path}")
         raise SystemExit(1)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     
-    output_path = OUTPUT_DIR / f"eswiki_neologisms_occurrences_clean_spacy.json"
+    output_path = OUTPUT_DIR / f"eswiki_neologisms_occurrences_{args.date}_{args.old_date}_spacy.json"
 
     print("Loading neologisms set...")
     neologisms = set()
-    with NEO_PATH.open("r", encoding="utf-8") as f:
+    with neo_path.open("r", encoding="utf-8") as f:
         for line in f:
             word = line.split('\t')[0]
             neologisms.add(word)

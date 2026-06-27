@@ -10,28 +10,38 @@ def main():
         description="Find neologistic phrasal nouns by comparing two extraction dumps."
     )
     parser.add_argument(
+        "--date",
+        default="20260301",
+        help="New dump date (default: 20260301)",
+    )
+    parser.add_argument(
+        "--old-date",
+        default="20251020",
+        help="Old dump date (default: 20251020)",
+    )
+    parser.add_argument(
         "--old",
         type=str,
-        default=str(DEFAULT_PN_DIR / "eswiki_20251020_phrasal_nouns_freq.txt"),
+        default=None,
         help="Path to the old phrasal nouns frequency file",
     )
     parser.add_argument(
         "--new",
         type=str,
-        default=str(DEFAULT_PN_DIR / "eswiki_20260301_phrasal_nouns_freq.txt"),
+        default=None,
         help="Path to the new phrasal nouns frequency file",
     )
     parser.add_argument(
         "--output",
         type=str,
-        default=str(DEFAULT_PN_DIR / "eswiki_neologisms_phrasal_nouns_20260301_20251020.txt"),
+        default=None,
         help="Path to save the output neologisms file",
     )
     args = parser.parse_args()
 
-    old_path = Path(args.old)
-    new_path = Path(args.new)
-    out_path = Path(args.output)
+    old_path = Path(args.old) if args.old else DEFAULT_PN_DIR / f'eswiki_{args.old_date}_phrasal_nouns_freq.txt'
+    new_path = Path(args.new) if args.new else DEFAULT_PN_DIR / f'eswiki_{args.date}_phrasal_nouns_freq.txt'
+    out_path = Path(args.output) if args.output else DEFAULT_PN_DIR / f'eswiki_neologisms_phrasal_nouns_{args.date}_{args.old_date}.txt'
 
     if not old_path.exists():
         print(f"Error: Old file not found at {old_path}", file=sys.stderr)

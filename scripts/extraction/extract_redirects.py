@@ -1,10 +1,10 @@
+import argparse
 import json
 import re
 from collections import defaultdict
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-INPUT_FILE = ROOT_DIR / "data" / "eswiki-20260301-pages-articles-ns0-clean.json"
 OUTPUT_FILE = ROOT_DIR / "data" / "redirects_map.json"
 
 REDIRECT_PREFIXES = ("#REDIRECCIÓN", "#REDIRECT")
@@ -23,6 +23,18 @@ def get_redirect_target(text: str) -> str:
     return ""
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Extract redirect mappings from a Wikipedia dump."
+    )
+    parser.add_argument(
+        "--date",
+        default="20260301",
+        help="Dump date (default: 20260301)",
+    )
+    args = parser.parse_args()
+
+    INPUT_FILE = ROOT_DIR / "data" / f"eswiki-{args.date}-pages-articles-ns0-clean.json"
+
     redirects_map = defaultdict(list)
     
     print(f"Reading from: {INPUT_FILE}")

@@ -32,9 +32,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--old-date",
+    default="20251020",
+    help="Old dump date (default: 20251020)",
+)
+
+parser.add_argument(
     "--neologisms",
     type=str,
-    default=str(PN_FREQ_DIR / "eswiki_neologisms_phrasal_nouns_20260301_20251020.txt"),
+    default=None,
     help="Path to the neologistic phrasal nouns file (tab-separated)",
 )
 
@@ -152,7 +158,7 @@ def is_valid_chunk(chunk) -> bool:
 def main():
     t_total = time.perf_counter()
 
-    neo_path = Path(args.neologisms)
+    neo_path = Path(args.neologisms) if args.neologisms else PN_FREQ_DIR / f'eswiki_neologisms_phrasal_nouns_{args.date}_{args.old_date}.txt'
     if not neo_path.exists():
         print(f"Error: Neologisms file not found at {neo_path}")
         raise SystemExit(1)
@@ -168,7 +174,7 @@ def main():
 
     PN_FREQ_DIR.mkdir(parents=True, exist_ok=True)
 
-    out_path = PN_FREQ_DIR / "eswiki_neologisms_phrasal_nouns_occurrences.json"
+    out_path = PN_FREQ_DIR / f'eswiki_neologisms_phrasal_nouns_occurrences_{args.date}_{args.old_date}.json'
 
     # ── 1. Load neologism set ─────────────────────────────────────────
     t0 = time.perf_counter()
