@@ -31,9 +31,27 @@ def main():
         default="20260301",
         help="Dump date (default: 20260301)",
     )
+    parser.add_argument(
+        "--input",
+        default=None,
+        help="Input JSON file path",
+    )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help="Output JSON file path",
+    )
     args = parser.parse_args()
 
-    INPUT_FILE = ROOT_DIR / "data" / f"eswiki-{args.date}-pages-articles-ns0-clean.json"
+    if args.input:
+        INPUT_FILE = Path(args.input)
+    else:
+        INPUT_FILE = ROOT_DIR / "data" / f"eswiki-{args.date}-pages-articles-ns0-clean.json"
+
+    if args.output:
+        OUTPUT_FILE = Path(args.output)
+    else:
+        OUTPUT_FILE = ROOT_DIR / "data" / "redirects_map.json"
 
     redirects_map = defaultdict(list)
     
