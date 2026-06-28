@@ -197,8 +197,8 @@ def build_pipeline(
                 name="find_neologistic_phrasal_nouns",
                 script="scripts/phrasal_nouns/find_neologistic_phrasal_nouns.py",
                 args=[
-                    "--input-new", str(DATA_DIR / "outputs" / "phrasal_nouns" / f"eswiki_{new}_phrasal_nouns_freq.txt"),
-                    "--input-old", str(DATA_DIR / "outputs" / "phrasal_nouns" / f"eswiki_{old}_phrasal_nouns_freq.txt"),
+                    "--new", str(DATA_DIR / "outputs" / "phrasal_nouns" / f"eswiki_{new}_phrasal_nouns_freq.txt"),
+                    "--old", str(DATA_DIR / "outputs" / "phrasal_nouns" / f"eswiki_{old}_phrasal_nouns_freq.txt"),
                     "--date", new, 
                     "--old-date", old,
                     "--output", str(DATA_DIR / "outputs" / "neologisms" / f"eswiki_neologisms_phrasal_nouns_{new}_{old}.txt")
@@ -259,6 +259,19 @@ def build_pipeline(
         / f"eswiki_neologisms_occurrences_{new}_{old}_spacy_enriched.json"
     )
 
+    input_enrichment_pn = (
+        DATA_DIR
+        / "outputs"
+        / "neologisms"
+        / f"eswiki_neologisms_phrasal_nouns_occurrences_{new}_{old}.json"
+    )
+    output_enrichment_pn = (
+        DATA_DIR
+        / "outputs"
+        / "neologisms"
+        / f"eswiki_neologisms_phrasal_nouns_occurrences_{new}_{old}_enriched.json"
+    )
+
     stage5 = Stage(
         name="Category Enrichment",
         steps=[
@@ -273,8 +286,18 @@ def build_pipeline(
                 ],
                 outputs=[output_enrichment],
             ),
+            Step(
+                name="enrich_categories_phrasal_nouns",
+                script="scripts/neologisms/enrich_categories.py",
+                args=[
+                    "--input",
+                    str(input_enrichment_pn),
+                    "--output",
+                    str(output_enrichment_pn),
+                ],
+                outputs=[output_enrichment_pn],
+            ),
         ],
-        parallel=False,
     )
 
     return [stage1, stage2, stage3, stage4, stage5]
@@ -306,10 +329,7 @@ def _outputs_exist(step: Step) -> bool:
 
 
 def _run_step(step: Step, logger: logging.Logger) -> None:
-    """Execute a single pipeline step as a subprocess.
-
-    Raises ``subprocess.CalledProcessError`` on failure.
-    """
+    """Execute a single pipeline step as a subprocess."""
     cmd = _build_command(step)
     cmd_str = " ".join(cmd)
 
@@ -475,6 +495,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Number of worker processes for spaCy scripts (passed through).",
     )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Limit the number of Namespace 0 (article) pages processed during extraction.",
+    )
 
     return parser.parse_args()
 
@@ -541,7 +567,7 @@ def main() -> int:
     logger = _setup_logging(new_date)
 
     logger.info("=" * 72)
-    logger.info("NEOLOGISM DETECTION PIPELINE")
+    logger.info("CORPUS AND DATASETS PIPELINE")
     logger.info("=" * 72)
     logger.info("  New dump date : %s", new_date)
     logger.info("  Old dump date : %s", old_date)
@@ -601,6 +627,8 @@ def main() -> int:
                 out_pages.parent.mkdir(parents=True, exist_ok=True)
                 
                 total = 0
+                ns0_count = 0
+                limit = args.limit
                 with bz2.open(bz2_path, "rb") as stream:
                     context = iter(ET.iterparse(stream, events=("start", "end")))
                     _, root = next(context)
@@ -654,6 +682,10 @@ def main() -> int:
                                         # pages-ns0-no-redirects-clean.json
                                         if namespace == 0 and not is_redirect:
                                             f_ns0_no_redir.write(clean_record + "\n")
+                                            ns0_count += 1
+                                            if limit is not None and ns0_count >= limit:
+                                                logger.info("  Reached limit of %d Namespace 0 articles. Stopping extraction.", limit)
+                                                break
                                 
                                 elem.clear()
                                 root.clear()
