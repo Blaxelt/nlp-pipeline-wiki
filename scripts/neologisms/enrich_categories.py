@@ -6,7 +6,7 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 FREQ_DIR = DATA_DIR / "frequency"
-CAT_DIR = DATA_DIR / "categories"
+CAT_DIR = DATA_DIR / "outputs" / "categories"
 
 
 def main():

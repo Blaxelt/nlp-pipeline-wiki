@@ -384,7 +384,7 @@ def run_stage(
 ) -> None:
     """Execute all steps in a pipeline stage."""
     logger.info("━" * 72)
-    logger.info("▸ %s", stage.name)
+    logger.info(" %s", stage.name)
     logger.info("━" * 72)
 
     steps_to_run: list[Step] = []
@@ -614,7 +614,7 @@ def main() -> int:
 
             for target_date in dates_to_download:
                 logger.info("━" * 72)
-                logger.info("▸ Stage 0 — Download & Extract Datasets (%s)", target_date)
+                logger.info("Download & Extract Datasets (%s)", target_date)
                 logger.info("━" * 72)
                 
                 bz2_path = _download_bz2(target_date)
@@ -696,6 +696,75 @@ def main() -> int:
                 logger.info("Stage 0 finished: generated 4 dataset variants for %s", target_date)
         except Exception as e:
             logger.error("Failed to download or extract datasets: %s", e)
+            return 1
+
+
+    cat_dir = DATA_DIR / "outputs" / "categories"
+    cat_depth_file = cat_dir / "category_depth.json"
+    cat_articles_file = cat_dir / "article_categories.json"
+
+    if skip_existing and cat_depth_file.exists() and cat_articles_file.exists():
+        logger.info("Category files already exist — skipping preparation.")
+    else:
+        logger.info("━" * 72)
+        logger.info(" Category Preparation - Download SQL dumps & build graph")
+        logger.info("━" * 72)
+
+        cat_dir.mkdir(parents=True, exist_ok=True)
+
+        sql_tables = ["categorylinks", "page", "linktarget"]
+        base_url = f"https://dumps.wikimedia.org/eswiki/{new_date}"
+
+        import gzip
+        import shutil
+
+        for table in sql_tables:
+            sql_file = cat_dir / f"eswiki-{new_date}-{table}.sql"
+            gz_file = cat_dir / f"eswiki-{new_date}-{table}.sql.gz"
+
+            if sql_file.exists():
+                logger.info("  %s already exists — skipping download.", sql_file.name)
+                continue
+
+            url = f"{base_url}/eswiki-{new_date}-{table}.sql.gz"
+            logger.info("  Downloading %s …", gz_file.name)
+
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "esdbpedia/1.0"})
+                with urllib.request.urlopen(req, timeout=300) as resp, \
+                     open(gz_file, "wb") as out:
+                    shutil.copyfileobj(resp, out)
+                logger.info("  Decompressing %s …", gz_file.name)
+                with gzip.open(gz_file, "rb") as f_in, open(sql_file, "wb") as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+                gz_file.unlink()
+                logger.info("  %s ready (%d MB)", sql_file.name, sql_file.stat().st_size // (1024 * 1024))
+            except Exception as e:
+                logger.error("  Failed to download/decompress %s: %s", table, e)
+                return 1
+
+        logger.info("  Running build_graph.py …")
+        try:
+            result = subprocess.run(
+                [sys.executable, str(PROJECT_ROOT / "scripts" / "categories" / "build_graph.py"),
+                 "--data-dir", str(cat_dir)],
+                cwd=str(PROJECT_ROOT),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if result.stdout:
+                for line in result.stdout.splitlines():
+                    logger.info("  [build_graph] %s", line)
+            if result.returncode != 0:
+                if result.stderr:
+                    for line in result.stderr.strip().splitlines()[-20:]:
+                        logger.error("  [build_graph] stderr: %s", line)
+                logger.error("  build_graph.py failed with exit code %d", result.returncode)
+                return 1
+            logger.info("  Category graph built successfully.")
+        except Exception as e:
+            logger.error("  Failed to run build_graph.py: %s", e)
             return 1
 
 
