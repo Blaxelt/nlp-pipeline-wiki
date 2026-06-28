@@ -22,6 +22,18 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--input",
+    default=None,
+    help="Input JSON file path (overrides --date based default)",
+)
+
+parser.add_argument(
+    "--output",
+    default=None,
+    help="Output frequency file path (overrides --date based default)",
+)
+
+parser.add_argument(
     "--limit",
     type=int,
     default=None,
@@ -60,21 +72,27 @@ def fmt_time(seconds: float) -> str:
 def main():
     t_total = time.perf_counter()
 
-    data_path = (
-        DATA_DIR
-        / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
-    )
+    if args.input:
+        data_path = Path(args.input)
+    else:
+        data_path = (
+            DATA_DIR
+            / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
+        )
 
     if not data_path.exists():
         print(f"Error: Dump not found at {data_path}")
         raise SystemExit(1)
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    freq_path = (
-        OUTPUT_DIR
-        / f"eswiki_{args.date}_token_frequencies.txt"
-    )
+    if args.output:
+        freq_path = Path(args.output)
+        freq_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        freq_path = (
+            OUTPUT_DIR
+            / f"eswiki_{args.date}_token_frequencies.txt"
+        )
 
     t0 = time.perf_counter()
 

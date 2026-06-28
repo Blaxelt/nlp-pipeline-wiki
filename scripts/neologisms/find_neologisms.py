@@ -26,11 +26,27 @@ def main():
         default="20251020",
         help="Old dump date (default: 20251020)",
     )
+    parser.add_argument(
+        "--input-new",
+        default=None,
+        help="Path to the new token frequency file",
+    )
+    parser.add_argument(
+        "--input-old",
+        default=None,
+        help="Path to the old token frequency file",
+    )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help="Path to save the output neologisms file",
+    )
     args = parser.parse_args()
 
-    old_path = freq_dir / f'eswiki_{args.old_date}_token_frequencies.txt'
-    new_path = freq_dir / f'eswiki_{args.date}_token_frequencies.txt'
-    out_path = freq_dir / f'eswiki_neologisms_{args.date}_{args.old_date}.txt'
+    old_path = Path(args.input_old) if args.input_old else freq_dir / f'eswiki_{args.old_date}_token_frequencies.txt'
+    new_path = Path(args.input_new) if args.input_new else freq_dir / f'eswiki_{args.date}_token_frequencies.txt'
+    out_path = Path(args.output) if args.output else freq_dir / f'eswiki_neologisms_{args.date}_{args.old_date}.txt'
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"Loading old vocab ({args.old_date})...")
     old_tokens = load_tokens(old_path)

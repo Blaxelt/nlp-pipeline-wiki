@@ -45,6 +45,24 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--input",
+    default=None,
+    help="Input JSON file path (overrides --date based default)",
+)
+
+parser.add_argument(
+    "--input-neologisms",
+    default=None,
+    help="Path to the neologisms frequency file (alias for --neologisms)",
+)
+
+parser.add_argument(
+    "--output",
+    default=None,
+    help="Output JSON file path",
+)
+
+parser.add_argument(
     "--limit",
     type=int,
     default=None,
@@ -80,7 +98,6 @@ def fmt_time(seconds: float) -> str:
     return f"{m}m {s:.1f}s"
 
 
-# ── Chunk validation (identical to extract_all_phrasal_nouns.py) ──────
 
 INVALID_POS = {SPACE, PUNCT}
 IGNORED_POS = {DET, PUNCT, SPACE, SYM}
@@ -153,30 +170,35 @@ def is_valid_chunk(chunk) -> bool:
     return True
 
 
-# ── Main ──────────────────────────────────────────────────────────────
 
 def main():
     t_total = time.perf_counter()
 
-    neo_path = Path(args.neologisms) if args.neologisms else PN_FREQ_DIR / f'eswiki_neologisms_phrasal_nouns_{args.date}_{args.old_date}.txt'
+    neo_src = args.input_neologisms or args.neologisms
+    neo_path = Path(neo_src) if neo_src else PN_FREQ_DIR / f'eswiki_neologisms_phrasal_nouns_{args.date}_{args.old_date}.txt'
     if not neo_path.exists():
         print(f"Error: Neologisms file not found at {neo_path}")
         raise SystemExit(1)
 
-    data_path = (
-        DATA_DIR
-        / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
-    )
+    if args.input:
+        data_path = Path(args.input)
+    else:
+        data_path = (
+            DATA_DIR
+            / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
+        )
 
     if not data_path.exists():
         print(f"Error: Dump not found at {data_path}")
         raise SystemExit(1)
 
-    PN_FREQ_DIR.mkdir(parents=True, exist_ok=True)
+    if args.output:
+        out_path = Path(args.output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        PN_FREQ_DIR.mkdir(parents=True, exist_ok=True)
+        out_path = PN_FREQ_DIR / f'eswiki_neologisms_phrasal_nouns_occurrences_{args.date}_{args.old_date}.json'
 
-    out_path = PN_FREQ_DIR / f'eswiki_neologisms_phrasal_nouns_occurrences_{args.date}_{args.old_date}.json'
-
-    # ── 1. Load neologism set ─────────────────────────────────────────
     t0 = time.perf_counter()
 
     neologism_set: set[str] = set()
@@ -189,7 +211,6 @@ def main():
     print(f"[TIME] Load neologisms: {fmt_time(time.perf_counter() - t0)}")
     print(f"  {len(neologism_set):,} neologistic phrasal nouns to search for")
 
-    # ── 2. Load spaCy model ───────────────────────────────────────────
     t0 = time.perf_counter()
 
     nlp = spacy.load(
@@ -220,7 +241,6 @@ def main():
     print(f"  Worker processes:    {args.processes}")
     print(f"  Max chars/article:   {MAX_CHARS:,}")
 
-    # ── 3. Stream articles and find occurrences ───────────────────────
     t0 = time.perf_counter()
 
     # neo_occurrences[phrase][page_title] = count
@@ -322,7 +342,6 @@ def main():
             f"{processed / processing_time:.1f} art/s"
         )
 
-    # ── 4. Format and save results ────────────────────────────────────
     t0 = time.perf_counter()
 
     results = []

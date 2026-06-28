@@ -89,6 +89,7 @@ def main():
     print(f"\nFinished reading. Found {redirects_count} total redirects targeting {len(redirects_map)} unique articles.")
     
     print(f"Writing results to: {OUTPUT_FILE}")
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as out_f:
         json.dump(dict(redirects_map), out_f, ensure_ascii=False, indent=2)
         

@@ -29,6 +29,24 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--input",
+    default=None,
+    help="Input JSON file path (overrides --date based default)",
+)
+
+parser.add_argument(
+    "--input-neologisms",
+    default=None,
+    help="Path to the neologisms frequency file",
+)
+
+parser.add_argument(
+    "--output",
+    default=None,
+    help="Output JSON file path",
+)
+
+parser.add_argument(
     "--limit",
     type=int,
     default=None,
@@ -67,12 +85,15 @@ def fmt_time(seconds: float) -> str:
 def main():
     t_total = time.perf_counter()
 
-    neo_path = DATA_DIR / "token_frequencies" / f"eswiki_neologisms_{args.date}_{args.old_date}.txt"
+    neo_path = Path(args.input_neologisms) if args.input_neologisms else DATA_DIR / "token_frequencies" / f"eswiki_neologisms_{args.date}_{args.old_date}.txt"
 
-    data_path = (
-        DATA_DIR
-        / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
-    )
+    if args.input:
+        data_path = Path(args.input)
+    else:
+        data_path = (
+            DATA_DIR
+            / f"eswiki-{args.date}-pages-articles-ns0-no-redirects-clean.json"
+        )
 
     if not data_path.exists():
         print(f"Error: Dump not found at {data_path}")
@@ -82,9 +103,12 @@ def main():
         print(f"Error: Neologisms file not found at {neo_path}")
         raise SystemExit(1)
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
-    output_path = OUTPUT_DIR / f"eswiki_neologisms_occurrences_{args.date}_{args.old_date}_spacy.json"
+    if args.output:
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        output_path = OUTPUT_DIR / f"eswiki_neologisms_occurrences_{args.date}_{args.old_date}_spacy.json"
 
     print("Loading neologisms set...")
     neologisms = set()
