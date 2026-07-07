@@ -45,9 +45,12 @@ def load(date: str) -> None:
     global _ids, _id_to_pos, _offsets, _data_path
     global _title_to_id, _lower_to_id, _sorted_titles, _current_date
 
-    # Prefer -clean files (improved text extraction), fall back to original
-    index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
-    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-clean.json"
+    # Prefer -ns0-clean files (produced by load_bz2), then -clean, then original
+    index_path = DATA_DIR / f"eswiki-{date}-index-ns0-clean.json"
+    data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-ns0-clean.json"
+    if not index_path.exists() or not data_path.exists():
+        index_path = DATA_DIR / f"eswiki-{date}-index-clean.json"
+        data_path  = DATA_DIR / f"eswiki-{date}-pages-articles-clean.json"
     if not index_path.exists() or not data_path.exists():
         index_path = DATA_DIR / f"eswiki-{date}-index.json"
         data_path  = DATA_DIR / f"eswiki-{date}-pages-articles.json"
