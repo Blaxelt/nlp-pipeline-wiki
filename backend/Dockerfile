@@ -12,13 +12,8 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m spacy download es_core_news_sm
 
-# Apply patches to installed packages
-COPY backend/patches/ /tmp/patches/
-RUN apt-get update && apt-get install -y --no-install-recommends patch && \
-    cd /usr/local/lib/python3.12/site-packages/wikiextractor && \
-    patch -p1 < /tmp/patches/wikiextractor-extract-regex.patch && \
-    rm -rf /tmp/patches/ && \
-    apt-get purge -y patch && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+# Overwrite wikiextractor with patched version (regex fix for Python 3.11+)
+COPY backend/patches/wikiextractor_extract.py /usr/local/lib/python3.12/site-packages/wikiextractor/extract.py
 
 COPY backend/app/ app/
 COPY backend/entrypoint.sh /app/entrypoint.sh
