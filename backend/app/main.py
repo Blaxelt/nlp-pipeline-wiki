@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import articles
 from app.api.routes import wikipedia_urls
 from app.api.routes import neologisms
+from app.api.routes import pipeline
 from contextlib import asynccontextmanager
 from app.core.wikipedia_index import load_index
 from app.core import neologism_reviews
@@ -33,3 +34,4 @@ app.add_middleware(
 app.include_router(articles.router)
 app.include_router(wikipedia_urls.router)
 app.include_router(neologisms.router)
+app.include_router(pipeline.router)

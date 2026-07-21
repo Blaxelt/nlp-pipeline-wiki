@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { NeologismFileModal } from '../components/NeologismFileModal'
+import { PipelinePanel } from '../components/PipelinePanel'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -192,6 +193,8 @@ export function NeologismsPage() {
                     Load neologism candidates
                 </button>
             </div>
+
+            <PipelinePanel />
 
             <div className="flex gap-0 mb-4">
                 <button
